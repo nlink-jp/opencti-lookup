@@ -44,6 +44,9 @@ make e2e     # live, against the dev stack (make dev-up, then seed — see READM
   write outside the judged work directory, and never under a name taken from
   upstream.
 - **Fixtures are fictional**: RFC 5737 / RFC 2606 values only (`dev/seed/`).
+  The Phase 0 captures (`dev/captures/`) also hold MITRE ATT&CK text as the dev
+  stack returned it, reproduced under MITRE's terms with the notice in
+  `dev/captures/NOTICE-MITRE-ATTACK.txt` — keep that notice with them.
 
 ## Communication Language
 

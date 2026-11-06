@@ -1,0 +1,28 @@
+# MITRE ATT&CK® content in these captures
+
+Some replies in this directory were captured from a development OpenCTI
+instance into which the MITRE ATT&CK dataset had been ingested (by the
+OpenCTI MITRE connector), and they hold ATT&CK text as the instance returned
+it — names, aliases, descriptions and relationship descriptions. Notably:
+
+- `entity-apt28.json`
+- `related-apt28-uses-attack-pattern.json`
+
+and, to a lesser degree, the search and recent-item captures that name
+ATT&CK objects.
+
+They are kept as evidence for the measurements in
+`docs/ja/opencti-lookup-phase0.ja.md`. This project is not affiliated with or
+endorsed by The MITRE Corporation.
+
+The ATT&CK content is reproduced under MITRE's ATT&CK Terms of Use
+(https://attack.mitre.org/resources/legal-and-branding/terms-of-use/), whose
+license and copyright designation are reproduced here as those terms require:
+
+> The MITRE Corporation (MITRE) hereby grants you a non-exclusive, royalty-free
+> license to use ATT&CK® for research, development, and commercial purposes.
+> Any copy you make for such purposes is authorized provided that you reproduce
+> MITRE's copyright designation and this license in any such copy.
+
+"© 2026 The MITRE Corporation. This work is reproduced and distributed with the
+permission of The MITRE Corporation."
