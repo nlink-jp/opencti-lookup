@@ -275,6 +275,28 @@ func TestFileCommand(t *testing.T) {
 	}
 }
 
+// The attachment's type comes from the instance (whoever uploaded it) and is
+// printed like every other upstream string: inert.
+func TestFileOutputIsInert(t *testing.T) {
+	r := setup(t, &stub{mime: "text/plain" + string(rune(0x1b)) + "]0;pwned" + string(rune(7)) + string(rune(0x1b)) + "[2J"})
+	code, out, errs := r("file", "x", "a.pdf", "--out", t.TempDir())
+	if code != exitOK {
+		t.Fatalf("%d %q", code, errs)
+	}
+	if strings.ContainsRune(out, 0x1b) || strings.ContainsRune(out, 7) || !strings.Contains(out, `\x1b`) {
+		t.Fatalf("a raw control reached the terminal: %q", out)
+	}
+}
+
+// file is an action: nothing saved is a failure, not an answer.
+func TestFileNotFoundFails(t *testing.T) {
+	r := setup(t, &stub{err: &engine.Error{Code: engine.CodeNotFound, Message: "no attachment named a.pdf"}})
+	code, out, errs := r("file", "x", "a.pdf", "--out", t.TempDir())
+	if code != exitError || out != "" || !strings.Contains(errs, "nothing saved") {
+		t.Fatalf("%d %q %q", code, out, errs)
+	}
+}
+
 func TestMCPCommand(t *testing.T) {
 	setup(t, &stub{})
 	var out, errb bytes.Buffer
