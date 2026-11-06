@@ -66,7 +66,7 @@ readable by others draws a warning.
 **Certificates.** For a self-signed or internal-CA certificate, point
 `ca_file` at it first. `ca_file` fixes only an untrusted issuer: the
 certificate must also name the host in a subjectAltName (`IP:…` for an IP
-address, `DNS:…` for a name) and be in date. A certificate that names its host
+address, `DNS:…` for a name), be in date and be issued for server use. A certificate that names its host
 only in the Common Name — what `openssl req` makes by default — is refused
 whoever issued it; ask the instance's operator for one with a subjectAltName.
 When none of that is possible, set `insecure_skip_verify = true` — anyone on the

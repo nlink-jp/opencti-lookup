@@ -24,13 +24,14 @@
 # self-signed or internal-CA certificate. Try this before insecure_skip_verify.
 # OPENCTI_LOOKUP_CA_FILE overrides this value.
 # It fixes only an untrusted issuer: the certificate must also carry a
-# subjectAltName for the host (IP:... or DNS:...) and be in date. A
+# subjectAltName for the host (IP:... or DNS:...), be in date and be issued
+# for server use. A
 # certificate that names its host only in the Common Name is refused anyway.
 #ca_file = "~/.config/opencti-lookup/opencti-ca.pem"
 
 # Skip TLS certificate verification. Anyone on the network path can then read
-# the token; use it only when ca_file cannot work (a hostname mismatch, an
-# expired certificate). The tool warns on every start and server_status says so.
+# the token; use it only when ca_file cannot work (a hostname mismatch, a
+# certificate out of date). The tool warns on every start and server_status says so.
 # OPENCTI_LOOKUP_INSECURE_SKIP_VERIFY overrides this value.
 #insecure_skip_verify = false
 

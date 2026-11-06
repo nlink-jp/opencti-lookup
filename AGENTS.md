@@ -134,4 +134,7 @@ another version.
   instance, 2026-11-07): Go reports "unknown authority" until the issuer is
   trusted, and only then "relies on legacy Common Name field". `tls.go`
   examines the presented certificate up front so the message names the real
-  cause; ca_file is offered only when the issuer is the whole problem.
+  cause; ca_file is offered only when the issuer is the whole problem. Do not
+  branch on the error type: on macOS with no ca_file, an expired,
+  not-yet-valid or client-only certificate is also "unknown authority", and Go
+  reports not-yet-valid with `Reason: x509.Expired` — read the certificate.

@@ -11,10 +11,12 @@ adheres to [Semantic Versioning](https://semver.org/).
 - A refused TLS certificate is explained by what is wrong with it. ca_file is
   offered only when the issuer is the whole problem; a certificate that names
   its host only in the legacy Common Name (no subjectAltName), names another
-  host, or has expired is reported as such, with what to ask the instance's
-  operator for — ca_file cannot fix those. The presented certificate is
-  examined even when verification stopped at the issuer, so the real cause is
-  named on the first attempt.
+  host, has expired, is not yet valid (check the clock first) or is not issued
+  for server use is reported as such, with what to ask the instance's operator
+  for — ca_file cannot fix those. The presented certificate is examined before
+  the error's type is trusted (on macOS the system verifier calls all of these
+  "unknown authority" while no ca_file is set), so the real cause is named on
+  the first attempt.
 
 ## [0.1.0] — 2026-11-06
 
