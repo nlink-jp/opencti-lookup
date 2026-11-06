@@ -1,0 +1,97 @@
+{
+ "as": "readonly",
+ "http_status": 200,
+ "query": "containers-of.graphql",
+ "reply": {
+  "data": {
+   "containers": {
+    "edges": [
+     {
+      "node": {
+       "created": "2026-10-01T00:00:00.000Z",
+       "entity_type": "Grouping",
+       "id": "e89a2549-22c5-4755-a8cb-1538df622cf8",
+       "objectMarking": [
+        {
+         "definition": "TLP:GREEN"
+        }
+       ],
+       "representative": {
+        "main": "Fixture grouping: Heron leads"
+       }
+      }
+     },
+     {
+      "node": {
+       "created": "2026-10-01T00:00:00.000Z",
+       "entity_type": "Note",
+       "id": "4b9ea36d-5590-446c-9d8b-6fb47f4c71c4",
+       "objectMarking": [
+        {
+         "definition": "TLP:GREEN"
+        }
+       ],
+       "representative": {
+        "main": "Fixture analyst note"
+       }
+      }
+     },
+     {
+      "node": {
+       "created": "2026-10-01T00:00:00.000Z",
+       "entity_type": "Report",
+       "id": "84ec431c-fe0f-4b73-b1b1-bdc344fded85",
+       "objectMarking": [
+        {
+         "definition": "TLP:GREEN"
+        }
+       ],
+       "representative": {
+        "main": "Fixture report: Operation Fixture Tide (GREEN)"
+       }
+      }
+     },
+     {
+      "node": {
+       "created": "2026-10-01T00:00:00.000Z",
+       "entity_type": "Report",
+       "id": "badc4c54-e3a8-46df-9ccf-abe260e3ec0b",
+       "objectMarking": [
+        {
+         "definition": "TLP:AMBER"
+        }
+       ],
+       "representative": {
+        "main": "Fixture report: Heron infrastructure (AMBER)"
+       }
+      }
+     }
+    ],
+    "pageInfo": {
+     "endCursor": "WyJyZXBvcnQtLWNmZGRjZjZhLWRkNWItNWJlYi1hN2E1LWQ3Yzc5ODJkNjVkZCJd",
+     "globalCount": 4,
+     "hasNextPage": false
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "objects"
+     ],
+     "operator": "eq",
+     "values": [
+      "e2ec11a1-833f-4328-a6e8-feca166b7af6"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 50
+ }
+}

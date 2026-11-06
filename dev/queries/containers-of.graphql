@@ -1,0 +1,6 @@
+query ContainersOf($filters: FilterGroup, $first: Int, $after: ID) {
+  containers(first: $first, after: $after, filters: $filters) {
+    pageInfo { globalCount hasNextPage endCursor }
+    edges { node { id entity_type representative { main } created objectMarking { definition } } }
+  }
+}

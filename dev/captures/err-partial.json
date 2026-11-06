@@ -1,0 +1,43 @@
+{
+ "as": "readonly",
+ "http_status": 200,
+ "query": "errors.graphql",
+ "reply": {
+  "data": {
+   "capabilities": null,
+   "reports": {
+    "edges": [
+     {
+      "node": {
+       "id": "84ec431c-fe0f-4b73-b1b1-bdc344fded85"
+      }
+     }
+    ]
+   }
+  },
+  "errors": [
+   {
+    "extensions": {
+     "code": "FORBIDDEN_ACCESS",
+     "data": {
+      "genre": "TECHNICAL",
+      "http_status": 403
+     }
+    },
+    "locations": [
+     {
+      "column": 61,
+      "line": 1
+     }
+    ],
+    "message": "You are not allowed to do this.",
+    "name": "FORBIDDEN_ACCESS",
+    "path": [
+     "capabilities"
+    ]
+   }
+  ]
+ },
+ "trimmed": null,
+ "variables": {}
+}

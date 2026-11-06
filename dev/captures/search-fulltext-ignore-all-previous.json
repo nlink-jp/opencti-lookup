@@ -1,0 +1,68 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "search.graphql",
+ "reply": {
+  "data": {
+   "stixDomainObjects": {
+    "edges": [
+     {
+      "node": {
+       "aliases": null,
+       "entity_type": "Malware",
+       "id": "8a27a00a-5db5-4ca7-8514-60f38a3c0fbf",
+       "representative": {
+        "main": "FixtureInjectionProbe"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Attack-Pattern",
+       "id": "50eaec0e-a59c-4757-a2b5-d3c61f785e2f",
+       "representative": {
+        "main": "[T1564.011] Ignore Process Interrupts"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Attack-Pattern",
+       "id": "c21aa217-4522-43fd-82b9-24c6fe3fee94",
+       "representative": {
+        "main": "[T1690] Prevent Command History Logging"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Attack-Pattern",
+       "id": "cd3c3875-5bcc-442b-a52d-b1797e7e2fc5",
+       "representative": {
+        "main": "[T0843.001] Download All"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Attack-Pattern",
+       "id": "268f9617-462f-4ba2-94d5-39690fa2172f",
+       "representative": {
+        "main": "Try All Common Switches"
+       }
+      }
+     }
+    ],
+    "pageInfo": {
+     "globalCount": 849,
+     "hasNextPage": true
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "first": 5,
+  "search": "IGNORE ALL PREVIOUS"
+ }
+}

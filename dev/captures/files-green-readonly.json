@@ -1,0 +1,59 @@
+{
+ "as": "readonly",
+ "http_status": 200,
+ "query": "report-files.graphql",
+ "reply": {
+  "data": {
+   "report": {
+    "importFiles": {
+     "edges": [
+      {
+       "node": {
+        "id": "import/Report/84ec431c-fe0f-4b73-b1b1-bdc344fded85/escape attempt.txt",
+        "lastModified": "2026-11-06T13:36:02.658Z",
+        "metaData": {
+         "mimetype": "text/plain",
+         "version": "2026-11-06T13:36:02.653Z"
+        },
+        "name": "escape attempt.txt",
+        "size": 48
+       }
+      },
+      {
+       "node": {
+        "id": "import/Report/84ec431c-fe0f-4b73-b1b1-bdc344fded85/fixture-attachment.txt",
+        "lastModified": "2026-11-06T13:36:02.631Z",
+        "metaData": {
+         "mimetype": "text/plain",
+         "version": "2026-11-06T13:36:02.626Z"
+        },
+        "name": "fixture-attachment.txt",
+        "size": 90
+       }
+      },
+      {
+       "node": {
+        "id": "import/Report/84ec431c-fe0f-4b73-b1b1-bdc344fded85/fixture-report.pdf",
+        "lastModified": "2026-11-06T13:36:02.597Z",
+        "metaData": {
+         "mimetype": "application/pdf",
+         "version": "2026-11-06T13:36:02.589Z"
+        },
+        "name": "fixture-report.pdf",
+        "size": 618
+       }
+      }
+     ],
+     "pageInfo": {
+      "globalCount": 3
+     }
+    },
+    "name": "Fixture report: Operation Fixture Tide (GREEN)"
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "id": "84ec431c-fe0f-4b73-b1b1-bdc344fded85"
+ }
+}

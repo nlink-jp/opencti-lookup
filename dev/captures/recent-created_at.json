@@ -1,0 +1,68 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "recent.graphql",
+ "reply": {
+  "data": {
+   "reports": {
+    "edges": [
+     {
+      "node": {
+       "created": "2026-10-01T00:00:00.000Z",
+       "created_at": "2026-11-06T13:06:27.422Z",
+       "published": "2026-10-01T00:00:00.000Z",
+       "representative": {
+        "main": "Fixture report: paging set (GREEN)"
+       },
+       "updated_at": "2026-11-06T13:06:27.457Z"
+      }
+     },
+     {
+      "node": {
+       "created": "2026-10-01T00:00:00.000Z",
+       "created_at": "2026-11-06T13:06:27.368Z",
+       "published": "2026-10-01T00:00:00.000Z",
+       "representative": {
+        "main": "Fixture report: Operation Fixture Tide (GREEN)"
+       },
+       "updated_at": "2026-11-06T13:36:02.665Z"
+      }
+     },
+     {
+      "node": {
+       "created": "2026-10-01T00:00:00.000Z",
+       "created_at": "2026-11-06T13:06:27.339Z",
+       "published": "2026-10-01T00:00:00.000Z",
+       "representative": {
+        "main": "Fixture report: Heron infrastructure (AMBER)"
+       },
+       "updated_at": "2026-11-06T13:06:27.346Z"
+      }
+     }
+    ],
+    "pageInfo": {
+     "globalCount": 4
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "created_at"
+     ],
+     "operator": "gte",
+     "values": [
+      "2026-11-01T00:00:00.000Z"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 3
+ }
+}

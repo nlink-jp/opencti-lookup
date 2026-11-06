@@ -1,0 +1,69 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "search-exact.graphql",
+ "reply": {
+  "data": {
+   "stixDomainObjects": {
+    "edges": [
+     {
+      "node": {
+       "entity_type": "Intrusion-Set",
+       "representative": {
+        "main": "APT28"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Malware",
+       "representative": {
+        "main": "CORESHELL"
+       }
+      }
+     }
+    ],
+    "pageInfo": {
+     "globalCount": 2
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "name"
+     ],
+     "operator": "eq",
+     "values": [
+      "Sofacy"
+     ]
+    },
+    {
+     "key": [
+      "aliases"
+     ],
+     "operator": "eq",
+     "values": [
+      "Sofacy"
+     ]
+    },
+    {
+     "key": [
+      "x_opencti_aliases"
+     ],
+     "operator": "eq",
+     "values": [
+      "Sofacy"
+     ]
+    }
+   ],
+   "mode": "or"
+  },
+  "first": 10
+ }
+}

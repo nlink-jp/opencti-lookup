@@ -1,0 +1,100 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "sightings.graphql",
+ "reply": {
+  "data": {
+   "stixSightingRelationships": {
+    "edges": [
+     {
+      "node": {
+       "attribute_count": 3,
+       "confidence": 100,
+       "createdBy": {
+        "name": "Example CERT (fixture)"
+       },
+       "first_seen": "2026-09-20T01:00:00.000Z",
+       "from": {
+        "entity_type": "Indicator",
+        "id": "2e9076eb-f414-417e-9482-3a4548e5562b",
+        "representative": {
+         "main": "192.0.2.10"
+        }
+       },
+       "id": "4d55bfba-07c8-4981-a8f0-1228a9237649",
+       "last_seen": "2026-09-22T05:30:00.000Z",
+       "objectMarking": [
+        {
+         "definition": "TLP:AMBER"
+        }
+       ],
+       "to": {
+        "entity_type": "Organization",
+        "id": "b744f133-6468-43d1-a91f-a2e1d53752ca",
+        "representative": {
+         "main": "Example Corp (fixture)"
+        }
+       },
+       "x_opencti_negative": false
+      }
+     },
+     {
+      "node": {
+       "attribute_count": 1,
+       "confidence": 100,
+       "createdBy": {
+        "name": "Example CERT (fixture)"
+       },
+       "first_seen": "2026-09-25T00:00:00.000Z",
+       "from": {
+        "entity_type": "Indicator",
+        "id": "2e9076eb-f414-417e-9482-3a4548e5562b",
+        "representative": {
+         "main": "192.0.2.10"
+        }
+       },
+       "id": "eacfe525-59ad-4224-a53e-cc1f3e63e355",
+       "last_seen": "2026-09-25T00:00:00.000Z",
+       "objectMarking": [
+        {
+         "definition": "TLP:GREEN"
+        }
+       ],
+       "to": {
+        "entity_type": "Organization",
+        "id": "81466492-19c3-4f36-910f-d9c5b11a5177",
+        "representative": {
+         "main": "Example Bank (fixture)"
+        }
+       },
+       "x_opencti_negative": true
+      }
+     }
+    ],
+    "pageInfo": {
+     "globalCount": 2,
+     "hasNextPage": false
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "fromId"
+     ],
+     "operator": "eq",
+     "values": [
+      "2e9076eb-f414-417e-9482-3a4548e5562b"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 10
+ }
+}

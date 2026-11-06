@@ -1,0 +1,34 @@
+{
+ "as": "readonly",
+ "http_status": 200,
+ "query": "inline: { capabilities(first: 1) { edges { node { name } } } }",
+ "reply": {
+  "data": {
+   "capabilities": null
+  },
+  "errors": [
+   {
+    "extensions": {
+     "code": "FORBIDDEN_ACCESS",
+     "data": {
+      "genre": "TECHNICAL",
+      "http_status": 403
+     }
+    },
+    "locations": [
+     {
+      "column": 3,
+      "line": 1
+     }
+    ],
+    "message": "You are not allowed to do this.",
+    "name": "FORBIDDEN_ACCESS",
+    "path": [
+     "capabilities"
+    ]
+   }
+  ]
+ },
+ "trimmed": null,
+ "variables": {}
+}

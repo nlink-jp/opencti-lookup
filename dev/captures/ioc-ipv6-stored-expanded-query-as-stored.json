@@ -1,0 +1,77 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "lookup-observable.graphql",
+ "reply": {
+  "data": {
+   "stixCyberObservables": {
+    "edges": [
+     {
+      "node": {
+       "containers": {
+        "edges": [],
+        "pageInfo": {
+         "globalCount": 0
+        }
+       },
+       "createdBy": {
+        "name": "Example CERT (fixture)"
+       },
+       "created_at": "2026-11-06T13:35:30.364Z",
+       "entity_type": "IPv6-Addr",
+       "id": "49c62670-df07-47d5-8ff2-9f5d82166067",
+       "indicators": {
+        "edges": [],
+        "pageInfo": {
+         "globalCount": 0
+        }
+       },
+       "objectLabel": [],
+       "objectMarking": [
+        {
+         "definition": "TLP:GREEN",
+         "definition_type": "TLP",
+         "x_opencti_order": 2
+        }
+       ],
+       "observable_value": "2001:0DB8:0000:0000:0000:0000:0000:0020",
+       "standard_id": "ipv6-addr--95d6f4af-cc23-5d0d-ab7b-fcbe76ca21d0",
+       "stixCoreRelationships": {
+        "edges": [],
+        "pageInfo": {
+         "globalCount": 0
+        }
+       },
+       "updated_at": "2026-11-06T13:35:30.371Z",
+       "x_opencti_score": 45
+      }
+     }
+    ],
+    "pageInfo": {
+     "endCursor": "WyJpcHY2LWFkZHItLTk1ZDZmNGFmLWNjMjMtNWQwZC1hYjdiLWZjYmU3NmNhMjFkMCJd",
+     "globalCount": 1,
+     "hasNextPage": false
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "value"
+     ],
+     "operator": "eq",
+     "values": [
+      "2001:0DB8:0000:0000:0000:0000:0000:0020"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 10
+ }
+}

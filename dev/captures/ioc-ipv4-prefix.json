@@ -1,0 +1,36 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "lookup-observable.graphql",
+ "reply": {
+  "data": {
+   "stixCyberObservables": {
+    "edges": [],
+    "pageInfo": {
+     "endCursor": "",
+     "globalCount": 0,
+     "hasNextPage": false
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "value"
+     ],
+     "operator": "eq",
+     "values": [
+      "192.0.2.1"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 10
+ }
+}

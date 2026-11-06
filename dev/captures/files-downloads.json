@@ -1,0 +1,72 @@
+{
+ "as": "per entry",
+ "http_status": null,
+ "query": "GET /storage/get/<url-encoded file id>",
+ "reply": {
+  "bad-token": {
+   "as": "bad-token",
+   "bytes": 9,
+   "content_type": "text/plain; charset=utf-8",
+   "file_id": "import/Report/84ec431c-fe0f-4b73-b1b1-bdc344fded85/fixture-attachment.txt",
+   "head": "Forbidden",
+   "http_status": 403,
+   "sha256": "78342a0905a72ce44da083dcb5d23b8ea0c16992ba2a82eece97e033d76ba3d3"
+  },
+  "escaped-name": {
+   "as": "readonly",
+   "bytes": 48,
+   "content_type": "text/plain; charset=utf-8",
+   "file_id": "import/Report/84ec431c-fe0f-4b73-b1b1-bdc344fded85/escape attempt.txt",
+   "head": "A file whose name tries to leave its directory.\n",
+   "http_status": 200,
+   "sha256": "d4639e1eeb60e07c1157f9492bb7b2e532f993802cda3d5d20bb6483f9d3c33d"
+  },
+  "missing": {
+   "as": "readonly",
+   "bytes": 57,
+   "content_type": "application/json; charset=utf-8",
+   "file_id": "import/Report/84ec431c-fe0f-4b73-b1b1-bdc344fded85/does-not-exist.txt",
+   "head": "{\"status\":\"error\",\"error\":\"File not found or restricted\"}",
+   "http_status": 503,
+   "sha256": "f3e5656fd6e2d5748638f5d635e2541fc472ce3cfdba97e9f0bd92e0c818fecc"
+  },
+  "pdf": {
+   "as": "readonly",
+   "bytes": 618,
+   "content_type": "application/pdf",
+   "file_id": "import/Report/84ec431c-fe0f-4b73-b1b1-bdc344fded85/fixture-report.pdf",
+   "head": "%PDF-1.4\n1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n2 0 obj\n<< /Type /Page",
+   "http_status": 200,
+   "sha256": "ea9e9dd2a4e94f32497272fa7782137f464f95dd42e2e3007b768a9c69df0647"
+  },
+  "red-as-admin": {
+   "as": "admin",
+   "bytes": 21,
+   "content_type": "text/plain; charset=utf-8",
+   "file_id": "import/Report/27c158ef-2f76-46bf-a892-4bd4f5c71edd/red-attachment.txt",
+   "head": "RED-only attachment.\n",
+   "http_status": 200,
+   "sha256": "2eeb1ebe714928897e0f230fd999b04a3f035a69d972419fa34dd771ea58feb0"
+  },
+  "red-as-readonly": {
+   "as": "readonly",
+   "bytes": 57,
+   "content_type": "application/json; charset=utf-8",
+   "file_id": "import/Report/27c158ef-2f76-46bf-a892-4bd4f5c71edd/red-attachment.txt",
+   "head": "{\"status\":\"error\",\"error\":\"File not found or restricted\"}",
+   "http_status": 503,
+   "sha256": "f3e5656fd6e2d5748638f5d635e2541fc472ce3cfdba97e9f0bd92e0c818fecc"
+  },
+  "txt": {
+   "as": "readonly",
+   "bytes": 90,
+   "content_type": "text/plain; charset=utf-8",
+   "file_id": "import/Report/84ec431c-fe0f-4b73-b1b1-bdc344fded85/fixture-attachment.txt",
+   "head": "Fixture attachment for opencti-lookup.\nFull text of the fictional report would l",
+   "http_status": 200,
+   "sha256": "2493e00a750703fadbc4ab1fb69360f4a9cc393edc6c9d5b4ac2da7b3c020130"
+  }
+ },
+ "trimmed": "bodies reduced to size, sha256 and first 80 bytes",
+ "variables": null
+}

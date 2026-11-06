@@ -1,0 +1,14 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "inline: { __type(name: \"Indicator\") { name } }",
+ "reply": {
+  "data": {
+   "__type": {
+    "name": "Indicator"
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {}
+}

@@ -1,0 +1,96 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "lookup-indicator.graphql",
+ "reply": {
+  "data": {
+   "indicators": {
+    "edges": [
+     {
+      "node": {
+       "confidence": 100,
+       "createdBy": {
+        "name": "Example CERT (fixture)"
+       },
+       "decay_applied_rule": {
+        "decay_lifetime": 300
+       },
+       "decay_base_score": 65,
+       "id": "d003afdd-b292-4a61-a3d8-fec2be810723",
+       "name": "orphan.example.org",
+       "objectMarking": [
+        {
+         "definition": "TLP:GREEN"
+        }
+       ],
+       "observables": {
+        "edges": [],
+        "pageInfo": {
+         "globalCount": 0
+        }
+       },
+       "pattern": "[domain-name:value = 'orphan.example.org']",
+       "pattern_type": "stix",
+       "revoked": false,
+       "standard_id": "indicator--44f671cb-0b78-5a9c-ab63-70420161e820",
+       "stixCoreRelationships": {
+        "edges": [
+         {
+          "node": {
+           "from": {
+            "entity_type": "Indicator",
+            "id": "d003afdd-b292-4a61-a3d8-fec2be810723",
+            "representative": {
+             "main": "orphan.example.org"
+            }
+           },
+           "relationship_type": "indicates",
+           "to": {
+            "entity_type": "Malware",
+            "id": "48fbc040-77f6-4224-8bae-242f0337a853",
+            "representative": {
+             "main": "FixtureLoader"
+            }
+           }
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "valid_from": "2026-09-01T00:00:00.000Z",
+       "valid_until": "2027-01-17T14:17:40.991Z",
+       "x_opencti_main_observable_type": "Domain-Name",
+       "x_opencti_score": 50
+      }
+     }
+    ],
+    "pageInfo": {
+     "endCursor": "WyJpbmRpY2F0b3ItLTQ0ZjY3MWNiLTBiNzgtNWE5Yy1hYjYzLTcwNDIwMTYxZTgyMCJd",
+     "globalCount": 1,
+     "hasNextPage": false
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "pattern"
+     ],
+     "operator": "contains",
+     "values": [
+      "orphan.example.org"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 10
+ }
+}

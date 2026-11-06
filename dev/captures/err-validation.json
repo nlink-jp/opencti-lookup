@@ -1,0 +1,24 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "inline: { about { no_such_field } }",
+ "reply": {
+  "errors": [
+   {
+    "extensions": {
+     "code": "GRAPHQL_VALIDATION_FAILED"
+    },
+    "locations": [
+     {
+      "column": 11,
+      "line": 1
+     }
+    ],
+    "message": "Cannot query field \"no_such_field\" on type \"AppInfo\".",
+    "name": "GRAPHQL_VALIDATION_FAILED"
+   }
+  ]
+ },
+ "trimmed": null,
+ "variables": {}
+}

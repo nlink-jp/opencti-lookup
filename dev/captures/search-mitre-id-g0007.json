@@ -1,0 +1,34 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "search-exact.graphql",
+ "reply": {
+  "data": {
+   "stixDomainObjects": {
+    "edges": [],
+    "pageInfo": {
+     "globalCount": 0
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "x_mitre_id"
+     ],
+     "operator": "eq",
+     "values": [
+      "G0007"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 10
+ }
+}

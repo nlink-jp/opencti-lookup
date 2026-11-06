@@ -1,0 +1,54 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "lookup-observable.graphql",
+ "reply": {
+  "data": {
+   "stixCyberObservables": null
+  },
+  "errors": [
+   {
+    "extensions": {
+     "code": "UNSUPPORTED_ERROR",
+     "data": {
+      "genre": "BUSINESS",
+      "http_status": 500,
+      "keys": [
+       "no_such_key"
+      ]
+     }
+    },
+    "locations": [
+     {
+      "column": 3,
+      "line": 2
+     }
+    ],
+    "message": "incorrect filter keys not existing in any schema definition",
+    "name": "UNSUPPORTED_ERROR",
+    "path": [
+     "stixCyberObservables"
+    ]
+   }
+  ]
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "no_such_key"
+     ],
+     "operator": "eq",
+     "values": [
+      "x"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 1
+ }
+}

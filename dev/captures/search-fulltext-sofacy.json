@@ -1,0 +1,81 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "search.graphql",
+ "reply": {
+  "data": {
+   "stixDomainObjects": {
+    "edges": [
+     {
+      "node": {
+       "aliases": [
+        "Trojan.Sofacy",
+        "Seduploader",
+        "JKEYSKW",
+        "Sednit",
+        "GAMEFISH",
+        "SofacyCarberp"
+       ],
+       "entity_type": "Malware",
+       "id": "9b12c9d7-9ba3-40c5-9598-1bad7008e760",
+       "representative": {
+        "main": "JHUHUGIT"
+       }
+      }
+     },
+     {
+      "node": {
+       "aliases": [
+        "Zekapab"
+       ],
+       "entity_type": "Malware",
+       "id": "9736ca8e-bdb0-4c54-9041-c45c28dccef9",
+       "representative": {
+        "main": "Zebrocy"
+       }
+      }
+     },
+     {
+      "node": {
+       "aliases": [],
+       "entity_type": "Malware",
+       "id": "3e51183d-8796-462b-8983-a697fa3ba8a5",
+       "representative": {
+        "main": "DealersChoice"
+       }
+      }
+     },
+     {
+      "node": {
+       "aliases": [],
+       "entity_type": "Malware",
+       "id": "6eb84423-8824-4b8f-aaa6-96fa0e10c3eb",
+       "representative": {
+        "main": "Cannon"
+       }
+      }
+     },
+     {
+      "node": {
+       "aliases": [],
+       "entity_type": "Malware",
+       "id": "c8810b2e-0ff9-4bfd-ba92-6a78abcba76e",
+       "representative": {
+        "main": "Komplex"
+       }
+      }
+     }
+    ],
+    "pageInfo": {
+     "globalCount": 18,
+     "hasNextPage": true
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "first": 5,
+  "search": "Sofacy"
+ }
+}

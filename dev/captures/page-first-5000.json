@@ -1,0 +1,20 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "inline: query($first: Int) { stixCoreRelationships(first: $first) { pageInfo { globalCount hasNextPage } edges { node { id } } } }",
+ "reply": {
+  "data": {
+   "stixCoreRelationships": {
+    "edge_count": 5000,
+    "pageInfo": {
+     "globalCount": 24918,
+     "hasNextPage": true
+    }
+   }
+  }
+ },
+ "trimmed": "edges replaced by edge_count",
+ "variables": {
+  "first": 5000
+ }
+}

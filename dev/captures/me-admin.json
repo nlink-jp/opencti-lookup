@@ -1,0 +1,84 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "me.graphql",
+ "reply": {
+  "data": {
+   "about": {
+    "version": "6.7.4"
+   },
+   "me": {
+    "allowed_marking": [
+     {
+      "definition": "TLP:GREEN",
+      "definition_type": "TLP",
+      "x_opencti_order": 2
+     },
+     {
+      "definition": "TLP:CLEAR",
+      "definition_type": "TLP",
+      "x_opencti_order": 1
+     },
+     {
+      "definition": "PAP:CLEAR",
+      "definition_type": "PAP",
+      "x_opencti_order": 1
+     },
+     {
+      "definition": "PAP:RED",
+      "definition_type": "PAP",
+      "x_opencti_order": 4
+     },
+     {
+      "definition": "PAP:GREEN",
+      "definition_type": "PAP",
+      "x_opencti_order": 2
+     },
+     {
+      "definition": "PAP:AMBER",
+      "definition_type": "PAP",
+      "x_opencti_order": 3
+     },
+     {
+      "definition": "TLP:RED",
+      "definition_type": "TLP",
+      "x_opencti_order": 5
+     },
+     {
+      "definition": "TLP:AMBER+STRICT",
+      "definition_type": "TLP",
+      "x_opencti_order": 4
+     },
+     {
+      "definition": "TLP:AMBER",
+      "definition_type": "TLP",
+      "x_opencti_order": 3
+     }
+    ],
+    "capabilities": [
+     {
+      "name": "KNOWLEDGE"
+     },
+     {
+      "name": "BYPASS"
+     }
+    ],
+    "effective_confidence_level": {
+     "max_confidence": 100
+    },
+    "max_shareable_marking": [
+     {
+      "definition": "TLP:RED"
+     },
+     {
+      "definition": "PAP:RED"
+     }
+    ],
+    "name": "admin",
+    "user_email": "admin@example.com"
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {}
+}

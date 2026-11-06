@@ -1,0 +1,141 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "lookup-observable.graphql",
+ "reply": {
+  "data": {
+   "stixCyberObservables": {
+    "edges": [
+     {
+      "node": {
+       "containers": {
+        "edges": [
+         {
+          "node": {
+           "created": "2026-10-01T00:00:00.000Z",
+           "entity_type": "Report",
+           "id": "84ec431c-fe0f-4b73-b1b1-bdc344fded85",
+           "objectMarking": [
+            {
+             "definition": "TLP:GREEN"
+            }
+           ],
+           "representative": {
+            "main": "Fixture report: Operation Fixture Tide (GREEN)"
+           }
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "createdBy": {
+        "name": "Example CERT (fixture)"
+       },
+       "created_at": "2026-11-06T12:53:31.732Z",
+       "entity_type": "StixFile",
+       "id": "b7bf84be-3b6a-42ef-822b-e3c177b6882c",
+       "indicators": {
+        "edges": [
+         {
+          "node": {
+           "confidence": 70,
+           "createdBy": {
+            "name": "Example CERT (fixture)"
+           },
+           "decay_applied_rule": {
+            "decay_lifetime": 460,
+            "decay_rule_id": "5691a161-89cd-4f29-8e56-9eff440aed04"
+           },
+           "decay_base_score": 90,
+           "id": "b663e4e1-b24e-468f-98a2-d1a98b887683",
+           "name": "491fc027d8e22a569e67a40c16b98c93a4586c5421b18894cdd5c40201277d20",
+           "objectMarking": [
+            {
+             "definition": "TLP:GREEN"
+            }
+           ],
+           "pattern": "[file:hashes.'SHA-256' = '491fc027d8e22a569e67a40c16b98c93a4586c5421b18894cdd5c40201277d20']",
+           "pattern_type": "stix",
+           "revoked": false,
+           "standard_id": "indicator--b05660ba-c112-567b-aec9-71e0f9bca4f4",
+           "valid_from": "2026-09-01T00:00:00.000Z",
+           "valid_until": "2027-09-02T21:11:47.299Z",
+           "x_opencti_score": 80
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "objectLabel": [],
+       "objectMarking": [
+        {
+         "definition": "TLP:GREEN",
+         "definition_type": "TLP",
+         "x_opencti_order": 2
+        }
+       ],
+       "observable_value": "491fc027d8e22a569e67a40c16b98c93a4586c5421b18894cdd5c40201277d20",
+       "standard_id": "file--90c21fc7-b831-5b32-a11e-cc09633ac5ab",
+       "stixCoreRelationships": {
+        "edges": [
+         {
+          "node": {
+           "from": {
+            "entity_type": "Indicator",
+            "id": "b663e4e1-b24e-468f-98a2-d1a98b887683",
+            "representative": {
+             "main": "491fc027d8e22a569e67a40c16b98c93a4586c5421b18894cdd5c40201277d20"
+            }
+           },
+           "relationship_type": "based-on",
+           "to": {
+            "entity_type": "StixFile",
+            "id": "b7bf84be-3b6a-42ef-822b-e3c177b6882c",
+            "representative": {
+             "main": "491fc027d8e22a569e67a40c16b98c93a4586c5421b18894cdd5c40201277d20"
+            }
+           }
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "updated_at": "2026-11-06T13:06:15.023Z",
+       "x_opencti_score": 90
+      }
+     }
+    ],
+    "pageInfo": {
+     "endCursor": "WyJmaWxlLS05MGMyMWZjNy1iODMxLTViMzItYTExZS1jYzA5NjMzYWM1YWIiXQ==",
+     "globalCount": 1,
+     "hasNextPage": false
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "hashes.SHA-256"
+     ],
+     "operator": "eq",
+     "values": [
+      "491FC027D8E22A569E67A40C16B98C93A4586C5421B18894CDD5C40201277D20"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 10
+ }
+}

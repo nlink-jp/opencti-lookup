@@ -1,0 +1,1 @@
+query Partial { reports(first: 1) { edges { node { id } } } capabilities(first: 1) { edges { node { name } } } }

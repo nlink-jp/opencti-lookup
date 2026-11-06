@@ -1,0 +1,68 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "sightings.graphql",
+ "reply": {
+  "data": {
+   "stixSightingRelationships": {
+    "edges": [
+     {
+      "node": {
+       "attribute_count": 2,
+       "confidence": 100,
+       "createdBy": {
+        "name": "Example CERT (fixture)"
+       },
+       "first_seen": "2026-09-21T00:00:00.000Z",
+       "from": {
+        "entity_type": "Domain-Name",
+        "id": "117e5ca0-7a79-4d26-bd0e-bd31ad24eac4",
+        "representative": {
+         "main": "bad.example.com"
+        }
+       },
+       "id": "3ec2c20e-9ec8-42e5-b692-5b64d3c83cca",
+       "last_seen": "2026-09-21T06:00:00.000Z",
+       "objectMarking": [
+        {
+         "definition": "TLP:GREEN"
+        }
+       ],
+       "to": {
+        "entity_type": "Organization",
+        "id": "b744f133-6468-43d1-a91f-a2e1d53752ca",
+        "representative": {
+         "main": "Example Corp (fixture)"
+        }
+       },
+       "x_opencti_negative": false
+      }
+     }
+    ],
+    "pageInfo": {
+     "globalCount": 1,
+     "hasNextPage": false
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "fromId"
+     ],
+     "operator": "eq",
+     "values": [
+      "117e5ca0-7a79-4d26-bd0e-bd31ad24eac4"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 10
+ }
+}

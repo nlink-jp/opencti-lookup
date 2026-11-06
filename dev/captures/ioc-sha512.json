@@ -1,0 +1,125 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "lookup-observable.graphql",
+ "reply": {
+  "data": {
+   "stixCyberObservables": {
+    "edges": [
+     {
+      "node": {
+       "containers": {
+        "edges": [],
+        "pageInfo": {
+         "globalCount": 0
+        }
+       },
+       "createdBy": {
+        "name": "Example CERT (fixture)"
+       },
+       "created_at": "2026-11-06T13:35:30.389Z",
+       "entity_type": "StixFile",
+       "id": "47a34305-a240-4585-b5fc-c1812a59aed8",
+       "indicators": {
+        "edges": [
+         {
+          "node": {
+           "confidence": 70,
+           "createdBy": {
+            "name": "Example CERT (fixture)"
+           },
+           "decay_applied_rule": {
+            "decay_lifetime": 460,
+            "decay_rule_id": "5691a161-89cd-4f29-8e56-9eff440aed04"
+           },
+           "decay_base_score": 80,
+           "id": "56abb48f-7b1a-4dac-b3e8-c8bed174cd52",
+           "name": "63e5896b25163a4cde6d19885eb9f9ad",
+           "objectMarking": [
+            {
+             "definition": "TLP:GREEN"
+            }
+           ],
+           "pattern": "[file:hashes.MD5 = '63e5896b25163a4cde6d19885eb9f9ad']",
+           "pattern_type": "stix",
+           "revoked": false,
+           "standard_id": "indicator--0a5cd4cf-7b71-51d0-a07f-189f8c2a75f1",
+           "valid_from": "2026-09-01T00:00:00.000Z",
+           "valid_until": "2027-08-22T01:39:36.555Z",
+           "x_opencti_score": 80
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "objectLabel": [],
+       "objectMarking": [
+        {
+         "definition": "TLP:GREEN",
+         "definition_type": "TLP",
+         "x_opencti_order": 2
+        }
+       ],
+       "observable_value": "88cc5f55e307df11bc6655168e10e2c1e898ab08e3b45743b1771a803a4e96052cccf040eb4f8e201e5ef5ac52bea4769342efb129a28e9d44c0e4cba24d3e8a",
+       "standard_id": "file--33ef5979-57c6-5ca9-aaab-fa8f08730003",
+       "stixCoreRelationships": {
+        "edges": [
+         {
+          "node": {
+           "from": {
+            "entity_type": "Indicator",
+            "id": "56abb48f-7b1a-4dac-b3e8-c8bed174cd52",
+            "representative": {
+             "main": "63e5896b25163a4cde6d19885eb9f9ad"
+            }
+           },
+           "relationship_type": "based-on",
+           "to": {
+            "entity_type": "StixFile",
+            "id": "47a34305-a240-4585-b5fc-c1812a59aed8",
+            "representative": {
+             "main": "88cc5f55e307df11bc6655168e10e2c1e898ab08e3b45743b1771a803a4e96052cccf040eb4f8e201e5ef5ac52bea4769342efb129a28e9d44c0e4cba24d3e8a"
+            }
+           }
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "updated_at": "2026-11-06T13:35:30.396Z",
+       "x_opencti_score": 80
+      }
+     }
+    ],
+    "pageInfo": {
+     "endCursor": "WyJmaWxlLS0zM2VmNTk3OS01N2M2LTVjYTktYWFhYi1mYThmMDg3MzAwMDMiXQ==",
+     "globalCount": 1,
+     "hasNextPage": false
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "hashes.SHA-512"
+     ],
+     "operator": "eq",
+     "values": [
+      "88cc5f55e307df11bc6655168e10e2c1e898ab08e3b45743b1771a803a4e96052cccf040eb4f8e201e5ef5ac52bea4769342efb129a28e9d44c0e4cba24d3e8a"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 10
+ }
+}

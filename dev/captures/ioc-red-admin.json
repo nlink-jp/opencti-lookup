@@ -1,0 +1,141 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "lookup-observable.graphql",
+ "reply": {
+  "data": {
+   "stixCyberObservables": {
+    "edges": [
+     {
+      "node": {
+       "containers": {
+        "edges": [
+         {
+          "node": {
+           "created": "2026-10-01T00:00:00.000Z",
+           "entity_type": "Report",
+           "id": "27c158ef-2f76-46bf-a892-4bd4f5c71edd",
+           "objectMarking": [
+            {
+             "definition": "TLP:RED"
+            }
+           ],
+           "representative": {
+            "main": "Fixture report: restricted (RED)"
+           }
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "createdBy": {
+        "name": "Example CERT (fixture)"
+       },
+       "created_at": "2026-11-06T12:53:31.936Z",
+       "entity_type": "IPv4-Addr",
+       "id": "9142340e-3ddc-43ac-b62f-db32d6996e13",
+       "indicators": {
+        "edges": [
+         {
+          "node": {
+           "confidence": 70,
+           "createdBy": {
+            "name": "Example CERT (fixture)"
+           },
+           "decay_applied_rule": {
+            "decay_lifetime": 47,
+            "decay_rule_id": "f436e96a-2c43-4607-b5cc-906db0de56e2"
+           },
+           "decay_base_score": 95,
+           "id": "1ad3b11f-187d-4859-bcb6-6454927441a6",
+           "name": "198.51.100.7",
+           "objectMarking": [
+            {
+             "definition": "TLP:RED"
+            }
+           ],
+           "pattern": "[ipv4-addr:value = '198.51.100.7']",
+           "pattern_type": "stix",
+           "revoked": true,
+           "standard_id": "indicator--3ae0b0a2-7289-5fda-8a85-02d057ba0968",
+           "valid_from": "2026-09-01T00:00:00.000Z",
+           "valid_until": "2026-10-02T19:41:18.503Z",
+           "x_opencti_score": 20
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "objectLabel": [],
+       "objectMarking": [
+        {
+         "definition": "TLP:RED",
+         "definition_type": "TLP",
+         "x_opencti_order": 5
+        }
+       ],
+       "observable_value": "198.51.100.7",
+       "standard_id": "ipv4-addr--12592121-be4c-5a93-a813-5a5af16e50db",
+       "stixCoreRelationships": {
+        "edges": [
+         {
+          "node": {
+           "from": {
+            "entity_type": "Indicator",
+            "id": "1ad3b11f-187d-4859-bcb6-6454927441a6",
+            "representative": {
+             "main": "198.51.100.7"
+            }
+           },
+           "relationship_type": "based-on",
+           "to": {
+            "entity_type": "IPv4-Addr",
+            "id": "9142340e-3ddc-43ac-b62f-db32d6996e13",
+            "representative": {
+             "main": "198.51.100.7"
+            }
+           }
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "updated_at": "2026-11-06T12:53:31.941Z",
+       "x_opencti_score": 95
+      }
+     }
+    ],
+    "pageInfo": {
+     "endCursor": "WyJpcHY0LWFkZHItLTEyNTkyMTIxLWJlNGMtNWE5My1hODEzLTVhNWFmMTZlNTBkYiJd",
+     "globalCount": 1,
+     "hasNextPage": false
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "value"
+     ],
+     "operator": "eq",
+     "values": [
+      "198.51.100.7"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 10
+ }
+}

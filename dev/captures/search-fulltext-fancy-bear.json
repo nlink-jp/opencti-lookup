@@ -1,0 +1,96 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "search.graphql",
+ "reply": {
+  "data": {
+   "stixDomainObjects": {
+    "edges": [
+     {
+      "node": {
+       "aliases": [
+        "Storm-0587",
+        "TA471",
+        "UAC-0056",
+        "Lorec53",
+        "UNC2589",
+        "Bleeding Bear",
+        "DEV-0586",
+        "Cadet Blizzard",
+        "Frozenvista",
+        "Saint Bear"
+       ],
+       "entity_type": "Intrusion-Set",
+       "id": "19468754-b847-44d8-8863-32120d8bb221",
+       "representative": {
+        "main": "Ember Bear"
+       }
+      }
+     },
+     {
+      "node": {
+       "aliases": [
+        "IRON TWILIGHT",
+        "SNAKEMACKEREL",
+        "Swallowtail",
+        "Group 74",
+        "Sednit",
+        "Sofacy",
+        "Pawn Storm",
+        "Fancy Bear",
+        "STRONTIUM",
+        "Tsar Team",
+        "Threat Group-4127",
+        "TG-4127",
+        "Forest Blizzard",
+        "FROZENLAKE",
+        "GruesomeLarch"
+       ],
+       "entity_type": "Intrusion-Set",
+       "id": "93cdf6c2-46fc-40b2-9cf4-67e38ca31b54",
+       "representative": {
+        "main": "APT28"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Attack-Pattern",
+       "id": "d165f387-6515-4aee-9379-4a6c830a86ea",
+       "representative": {
+        "main": "Manipulating Opaque Client-based Data Tokens"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Attack-Pattern",
+       "id": "09683086-983e-4fc8-8cc4-dee7ecb85475",
+       "representative": {
+        "main": "[T1599] Network Boundary Bridging"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Campaign",
+       "id": "9e31d4ef-fcbe-46e3-ad15-59b3a0172567",
+       "representative": {
+        "main": "SolarWinds Compromise"
+       }
+      }
+     }
+    ],
+    "pageInfo": {
+     "globalCount": 13,
+     "hasNextPage": true
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "first": 5,
+  "search": "Fancy Bear"
+ }
+}

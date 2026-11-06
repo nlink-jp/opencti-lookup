@@ -1,0 +1,71 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "search.graphql",
+ "reply": {
+  "data": {
+   "stixDomainObjects": {
+    "edges": [
+     {
+      "node": {
+       "aliases": [
+        "Heron Fixture Group",
+        "TA-FIXTURE-01"
+       ],
+       "entity_type": "Intrusion-Set",
+       "id": "e2ec11a1-833f-4328-a6e8-feca166b7af6",
+       "representative": {
+        "main": "FIXTURE-HERON"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Report",
+       "id": "84ec431c-fe0f-4b73-b1b1-bdc344fded85",
+       "representative": {
+        "main": "Fixture report: Operation Fixture Tide (GREEN)"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Campaign",
+       "id": "94c5b921-3f5e-4673-bae3-ccb95880aa70",
+       "representative": {
+        "main": "Operation Fixture Tide"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Sector",
+       "id": "e22d5297-7dcd-4313-9bc5-687125a3114e",
+       "representative": {
+        "main": "Fixture Finance Sector"
+       }
+      }
+     },
+     {
+      "node": {
+       "entity_type": "Organization",
+       "id": "175247ab-ce3d-44e8-b299-4e815627fcd0",
+       "representative": {
+        "main": "Example CERT (fixture)"
+       }
+      }
+     }
+    ],
+    "pageInfo": {
+     "globalCount": 305,
+     "hasNextPage": true
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "first": 5,
+  "search": "TA-FIXTURE-01"
+ }
+}

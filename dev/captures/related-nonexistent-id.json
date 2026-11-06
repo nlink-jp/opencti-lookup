@@ -1,0 +1,24 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "related.graphql",
+ "reply": {
+  "data": {
+   "stixCoreRelationships": {
+    "edges": [],
+    "pageInfo": {
+     "endCursor": "",
+     "globalCount": 0,
+     "hasNextPage": false
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "first": 10,
+  "id": [
+   "00000000-0000-4000-8000-000000000000"
+  ]
+ }
+}

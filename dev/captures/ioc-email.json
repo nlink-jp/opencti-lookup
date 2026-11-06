@@ -1,0 +1,141 @@
+{
+ "as": "admin",
+ "http_status": 200,
+ "query": "lookup-observable.graphql",
+ "reply": {
+  "data": {
+   "stixCyberObservables": {
+    "edges": [
+     {
+      "node": {
+       "containers": {
+        "edges": [
+         {
+          "node": {
+           "created": "2026-10-01T00:00:00.000Z",
+           "entity_type": "Report",
+           "id": "badc4c54-e3a8-46df-9ccf-abe260e3ec0b",
+           "objectMarking": [
+            {
+             "definition": "TLP:AMBER"
+            }
+           ],
+           "representative": {
+            "main": "Fixture report: Heron infrastructure (AMBER)"
+           }
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "createdBy": {
+        "name": "Example CERT (fixture)"
+       },
+       "created_at": "2026-11-06T12:53:31.782Z",
+       "entity_type": "Email-Addr",
+       "id": "97415b89-5d77-461c-9723-c689694de791",
+       "indicators": {
+        "edges": [
+         {
+          "node": {
+           "confidence": 70,
+           "createdBy": {
+            "name": "Example CERT (fixture)"
+           },
+           "decay_applied_rule": {
+            "decay_lifetime": 470,
+            "decay_rule_id": "84ad304b-c519-42c4-bb25-6eb43ed027cf"
+           },
+           "decay_base_score": 60,
+           "id": "529ae69f-e004-495b-8b01-be27f25df0b6",
+           "name": "phisher@example.net",
+           "objectMarking": [
+            {
+             "definition": "TLP:GREEN"
+            }
+           ],
+           "pattern": "[email-addr:value = 'phisher@example.net']",
+           "pattern_type": "stix",
+           "revoked": false,
+           "standard_id": "indicator--88b44a6f-0309-5295-a6f7-32f7c46133aa",
+           "valid_from": "2026-09-01T00:00:00.000Z",
+           "valid_until": "2027-07-05T01:04:48.385Z",
+           "x_opencti_score": 60
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "objectLabel": [],
+       "objectMarking": [
+        {
+         "definition": "TLP:GREEN",
+         "definition_type": "TLP",
+         "x_opencti_order": 2
+        }
+       ],
+       "observable_value": "phisher@example.net",
+       "standard_id": "email-addr--c9945989-4893-5259-9e02-4c872a97b5b3",
+       "stixCoreRelationships": {
+        "edges": [
+         {
+          "node": {
+           "from": {
+            "entity_type": "Indicator",
+            "id": "529ae69f-e004-495b-8b01-be27f25df0b6",
+            "representative": {
+             "main": "phisher@example.net"
+            }
+           },
+           "relationship_type": "based-on",
+           "to": {
+            "entity_type": "Email-Addr",
+            "id": "97415b89-5d77-461c-9723-c689694de791",
+            "representative": {
+             "main": "phisher@example.net"
+            }
+           }
+          }
+         }
+        ],
+        "pageInfo": {
+         "globalCount": 1
+        }
+       },
+       "updated_at": "2026-11-06T12:53:31.788Z",
+       "x_opencti_score": 60
+      }
+     }
+    ],
+    "pageInfo": {
+     "endCursor": "WyJlbWFpbC1hZGRyLS1jOTk0NTk4OS00ODkzLTUyNTktOWUwMi00Yzg3MmE5N2I1YjMiXQ==",
+     "globalCount": 1,
+     "hasNextPage": false
+    }
+   }
+  }
+ },
+ "trimmed": null,
+ "variables": {
+  "filters": {
+   "filterGroups": [],
+   "filters": [
+    {
+     "key": [
+      "value"
+     ],
+     "operator": "eq",
+     "values": [
+      "phisher@example.net"
+     ]
+    }
+   ],
+   "mode": "and"
+  },
+  "first": 10
+ }
+}
