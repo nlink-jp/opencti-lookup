@@ -1,6 +1,7 @@
 // Package mcp is a dependency-free stdio JSON-RPC 2.0 MCP server over the
 // shared engine, answering lookup_ioc, search_threats, get_entity,
-// get_related, get_reports, server_status and get_usage.
+// get_related, get_reports, list_recent, get_report_file, server_status and
+// get_usage.
 //
 // This package is where the response budget lives. The engine returns complete
 // views; what one tool result may cost is decided here. Two backstops sit at
@@ -8,8 +9,10 @@
 // not carried whole by design (a description, a pattern) is shortened and
 // named, and no result leaves over 128 KB — a lookup or a search loses items
 // from its tail and an object its longest text, named in notes; a paged list
-// is refused, because dropping rows would make its cursor skip them. Nothing is spilled to a file: the
-// calling runtime does that (organization ADR-021 §3).
+// is refused, because dropping rows would make its cursor skip them. Nothing
+// is spilled to a file: the calling runtime does that (organization ADR-021
+// §3). get_report_file's product is a file, so it writes one — into the
+// caller's work directory, judged by nlink-jp/pathguard.
 //
 // get_usage is canonical: the embedded manual is what an agent reads before
 // its first call, and meta-tests pin it to the code. Tool errors are

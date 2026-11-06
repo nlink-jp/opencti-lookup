@@ -19,7 +19,7 @@ no packet reaches the target under investigation. It never writes.
 ## Status
 
 Phases 1 and 2 of the [RFP](docs/en/opencti-lookup-rfp.md) are implemented and
-tested against OpenCTI 6.7.4. Not yet released.
+tested against OpenCTI 6.7.4. Versions are in [CHANGELOG.md](CHANGELOG.md).
 
 ## Requirements
 
@@ -29,6 +29,14 @@ tested against OpenCTI 6.7.4. Not yet released.
 - Go 1.25+ to build.
 
 ## Installation
+
+```bash
+brew install nlink-jp/tap/opencti-lookup   # macOS, Apple silicon
+```
+
+Or download the archive for your platform from the
+[releases](https://github.com/nlink-jp/opencti-lookup/releases), or build from
+source:
 
 ```bash
 make build   # → dist/opencti-lookup
@@ -95,7 +103,7 @@ credential directories and this tool's own config directory.
 |---|---|
 | 0 | Answered — "not found" and an empty list are answers |
 | 1 | The instance could not be asked, or not fully (`INCONCLUSIVE` in the output) |
-| 2 | Invalid input, configuration, a refused key, a missing permission |
+| 2 | Invalid input, configuration, a refused key, a missing permission — and for `file`, nothing saved (the attachment is not there for this key) |
 
 ## Reading the answers
 

@@ -18,7 +18,7 @@ observable と indicator、その目撃情報（誤検知としての目撃か�
 ## 状態
 
 [RFP](docs/ja/opencti-lookup-rfp.ja.md) の Phase 1 と Phase 2 を実装し、OpenCTI 6.7.4 で
-試験済みです。まだリリースしていません。
+試験済みです。版の履歴は [CHANGELOG.md](CHANGELOG.md) にあります。
 
 ## 必要なもの
 
@@ -27,6 +27,13 @@ observable と indicator、その目撃情報（誤検知としての目撃か�
 - ビルドには Go 1.25 以上
 
 ## 導入
+
+```bash
+brew install nlink-jp/tap/opencti-lookup   # macOS（Apple シリコン）
+```
+
+または [リリース](https://github.com/nlink-jp/opencti-lookup/releases) から各プラットフォームの
+アーカイブを取得するか、ソースからビルドします:
 
 ```bash
 make build   # → dist/opencti-lookup
@@ -90,7 +97,7 @@ opencti-lookup status
 |---|---|
 | 0 | 答えた（「見つからない」も空の一覧も答え） |
 | 1 | インスタンスに問い合わせられなかった、または一部しか問い合わせられなかった（出力に `INCONCLUSIVE`） |
-| 2 | 入力・設定の誤り、キーの拒否、権限の不足 |
+| 2 | 入力・設定の誤り、キーの拒否、権限の不足。`file` では、何も保存しなかったとき（このキーで見える添付が無い） |
 
 ## 答えの読み方
 
