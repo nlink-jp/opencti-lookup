@@ -53,6 +53,10 @@ func run(args []string, version string, stdin io.Reader, stdout, stderr io.Write
 		return runReports(rest, stdout, stderr)
 	case "status":
 		return runStatus(rest, stdout, stderr)
+	case "recent":
+		return runRecent(rest, stdout, stderr)
+	case "file":
+		return runFile(rest, stdout, stderr)
 	case "mcp":
 		return runMCP(rest, version, stdin, stdout, stderr)
 	case "version", "--version", "-v":
@@ -91,6 +95,8 @@ Commands:
   entity <ID>              One object in full
   related <ID>             The relationships of one object, paged
   reports <ID>             The reports, notes and groupings that contain one object
+  recent                   Reports or indicators newly ingested or published (last N days)
+  file <ID> <NAME>         Save one attachment of an object (NAME as entity lists it)
   status                   Version, what the key can do and see, the config file read
   mcp                      Run as a local MCP server (stdio)
   version                  Print the version
@@ -104,6 +110,10 @@ Flags (before or after the arguments):
   related:  --relationship R (repeatable)  --target-type T (repeatable)
             --descriptions  --limit N  --cursor C
   reports:  --limit N  --cursor C
+  recent:   --type report|indicator  --by created_at|created|published
+            --days N (1-365, default 7)  --limit N  --cursor C
+  file:     --out DIR (default the current directory; the saved name is
+            rebuilt as opencti-lookup-<id>-<safe name>)
 
 An empty answer means nothing within what this key can see: OpenCTI answers
 "not registered" and "not visible to this key" identically. "status" shows

@@ -3,9 +3,11 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -13,6 +15,8 @@ import (
 	"github.com/nlink-jp/opencti-lookup/internal/engine"
 	"github.com/nlink-jp/opencti-lookup/internal/mcp"
 	"github.com/nlink-jp/opencti-lookup/internal/opencti"
+	"github.com/nlink-jp/pathguard"
+	"github.com/nlink-jp/pathguard/workdir"
 )
 
 // common holds the flags every query command takes.
@@ -348,10 +352,122 @@ func runMCP(args []string, version string, stdin io.Reader, stdout, stderr io.Wr
 	for _, w := range cfg.Warnings {
 		fmt.Fprintf(stderr, "Warning: %s\n", w)
 	}
-	srv := &mcp.Server{Eng: newEngine(cfg), Version: version}
+	srv := &mcp.Server{Eng: newEngine(cfg), Version: version, WorkDirs: workDirs(cfg)}
 	if err := srv.Serve(context.Background(), stdin, stdout); err != nil {
 		fmt.Fprintf(stderr, "opencti-lookup: mcp: %v\n", err)
 		return exitError
 	}
+	return exitOK
+}
+
+// workDirs builds the work-directory judge (organization ADR-021 / ADR-022)
+// with this tool's own configuration directories protected: every directory a
+// config file is searched in, and the one actually read, since they hold the
+// token.
+func workDirs(cfg *config.Config) workdir.Resolver {
+	seen := map[string]bool{}
+	var places []pathguard.Place
+	add := func(file string) {
+		dir := filepath.Dir(file)
+		if file == "" || !filepath.IsAbs(dir) || seen[dir] {
+			return
+		}
+		seen[dir] = true
+		places = append(places, pathguard.ServerDir(dir, "which holds the OpenCTI token"))
+	}
+	for _, p := range config.SearchPaths() {
+		add(p)
+	}
+	add(cfg.Path)
+	return workdir.NewResolver(workdir.Options{
+		Protected:    places,
+		RequiredHint: "The attachment is written there and returned as a path, and a path you cannot open is worth nothing.",
+	})
+}
+
+func runRecent(args []string, stdout, stderr io.Writer) int {
+	var c common
+	var q engine.RecentQuery
+	fs := newFlags("recent", stderr)
+	c.register(fs)
+	fs.StringVar(&q.Type, "type", "", "report (default) or indicator")
+	fs.StringVar(&q.Axis, "by", "", "created_at (default), created or published")
+	fs.IntVar(&q.Days, "days", 0, "days back, 1-365 (default 7)")
+	fs.IntVar(&q.Limit, "limit", 0, "rows")
+	fs.StringVar(&q.Cursor, "cursor", "", "next_cursor from a previous answer")
+	extra, err := parseInterleaved(fs, args)
+	if err != nil {
+		return exitError
+	}
+	if len(extra) > 0 {
+		fmt.Fprintf(stderr, "opencti-lookup: recent takes no arguments (got %q)\n", extra[0])
+		return exitError
+	}
+	eng, cfg, code := c.load(stderr)
+	if code != exitOK {
+		return code
+	}
+	cx, cancel := ctx(cfg)
+	defer cancel()
+	res, err := eng.ListRecent(cx, q)
+	if err != nil {
+		return exitFor(err, stderr)
+	}
+	if c.jsonOut {
+		if err := writeJSON(stdout, res); err != nil {
+			return exitFor(err, stderr)
+		}
+		return exitOK
+	}
+	renderRecent(stdout, forText(res))
+	return exitOK
+}
+
+func runFile(args []string, stdout, stderr io.Writer) int {
+	var c common
+	out := "."
+	fs := newFlags("file", stderr)
+	c.register(fs)
+	fs.StringVar(&out, "out", ".", "directory to save into (default the current directory)")
+	pos, err := parseInterleaved(fs, args)
+	if err != nil {
+		return exitError
+	}
+	if len(pos) != 2 {
+		fmt.Fprintln(stderr, "opencti-lookup: file takes an id and an attachment name (as entity lists it)")
+		return exitError
+	}
+	dir, err := filepath.Abs(out)
+	if err != nil {
+		fmt.Fprintf(stderr, "opencti-lookup: --out: %v\n", err)
+		return exitError
+	}
+	eng, cfg, code := c.load(stderr)
+	if code != exitOK {
+		return code
+	}
+	cx, cancel := ctx(cfg)
+	defer cancel()
+	srv := &mcp.Server{Eng: eng, WorkDirs: workDirs(cfg)}
+	res, err := srv.GetReportFile(cx, pos[0], pos[1], dir)
+	if err != nil {
+		var we *workdir.Error
+		if errors.As(err, &we) {
+			fmt.Fprintf(stderr, "opencti-lookup: --out %s: %s\n", out, visible(we.Message, false))
+			return exitError
+		}
+		if code, ok := answerNotFound(err, stdout, stderr); ok {
+			return code
+		}
+		return exitFor(err, stderr)
+	}
+	if c.jsonOut {
+		if err := writeJSON(stdout, res); err != nil {
+			return exitFor(err, stderr)
+		}
+		return exitOK
+	}
+	fmt.Fprintf(stdout, "saved %s (%d bytes, %s, sha256 %s)\n  from %s %s, attachment %q\n",
+		res.AbsPath, res.Bytes, res.MimeType, res.SHA256, res.Of.Type, visible(res.Of.Name, false), visible(res.Name, false))
 	return exitOK
 }

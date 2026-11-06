@@ -314,3 +314,28 @@ func renderStatus(w io.Writer, s *engine.Status) {
 		line("warning", warn)
 	}
 }
+
+func renderRecent(w io.Writer, r *engine.RecentResult) {
+	fmt.Fprintf(w, "%s by %s since %s — %d, %d shown\n", r.Type, r.Axis, day(r.Since), r.Total, r.Returned)
+	for _, row := range r.Rows {
+		when := row.CreatedAt
+		switch r.Axis {
+		case "created":
+			when = row.Created
+		case "published":
+			when = row.Published
+		}
+		extra := ""
+		if row.Revoked {
+			extra = "  REVOKED"
+		}
+		if row.Score != nil {
+			extra += "  score " + num(row.Score)
+		}
+		fmt.Fprintf(w, "  %s  %s %s%s  %s%s\n      id %s\n", day(when), row.Type, row.Name, extra, tags(row.Markings), by(row.CreatedBy), row.ID)
+		if row.Pattern != "" {
+			block(w, row.Pattern)
+		}
+	}
+	page(w, r.Page, "opencti-lookup recent --type "+r.Type+" --by "+r.Axis)
+}

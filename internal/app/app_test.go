@@ -3,6 +3,8 @@ package app
 import (
 	"bytes"
 	"context"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,6 +51,18 @@ func (s *stub) GetRelated(_ context.Context, q engine.RelatedQuery) (*engine.Rel
 func (s *stub) GetReports(_ context.Context, id string, limit int, cursor string) (*engine.ReportsResult, error) {
 	s.got = []string{id, cursor}
 	return &engine.ReportsResult{Of: engine.Ref{ID: id}}, s.err
+}
+func (s *stub) ListRecent(_ context.Context, q engine.RecentQuery) (*engine.RecentResult, error) {
+	s.got = []string{q.Type, q.Axis, fmt.Sprint(q.Days)}
+	return &engine.RecentResult{Type: q.Type, Axis: q.Axis, Rows: []engine.RecentRow{{Ref: engine.Ref{Name: "R1", Type: "Report"}}}}, s.err
+}
+func (s *stub) GetFile(_ context.Context, id, name string, w io.Writer) (*engine.FileInfo, error) {
+	s.got = []string{id, name}
+	if s.err != nil {
+		return nil, s.err
+	}
+	n, _ := io.WriteString(w, "attachment body")
+	return &engine.FileInfo{Name: name, Bytes: int64(n), SHA256: "sha"}, nil
 }
 func (s *stub) ServerStatus(context.Context) *engine.Status {
 	if s.status != nil {
@@ -199,6 +213,49 @@ func TestConfigWarningsAndErrors(t *testing.T) {
 	}
 	if code, _, errs := r("status", "-c", filepath.Join(t.TempDir(), "missing.toml")); code != exitError || !strings.Contains(errs, "does not exist") {
 		t.Errorf("%d %q", code, errs)
+	}
+}
+
+func TestRecentCommand(t *testing.T) {
+	s := &stub{}
+	r := setup(t, s)
+	code, out, _ := r("recent", "--type", "indicator", "--by", "created", "--days", "30")
+	if code != exitOK || strings.Join(s.got, ",") != "indicator,created,30" || !strings.Contains(out, "R1") {
+		t.Fatalf("%d %v %q", code, s.got, out)
+	}
+	if code, _, _ := r("recent", "extra"); code != exitError {
+		t.Fatal("recent with an argument")
+	}
+}
+
+func TestFileCommand(t *testing.T) {
+	s := &stub{}
+	r := setup(t, s)
+	out := t.TempDir()
+	code, stdout, errs := r("file", "84ec431c-xyz", "../report v2.pdf", "--out", out)
+	if code != exitOK {
+		t.Fatalf("%d %q", code, errs)
+	}
+	saved := filepath.Join(out, "opencti-lookup-84ec431c-report_v2.pdf")
+	resolved, _ := filepath.EvalSymlinks(out)
+	if b, err := os.ReadFile(saved); err != nil || string(b) != "attachment body" || !strings.Contains(stdout, filepath.Join(resolved, "opencti-lookup-84ec431c-report_v2.pdf")) {
+		t.Fatalf("%q %v %q", b, err, stdout)
+	}
+	if strings.Join(s.got, ",") != "84ec431c-xyz,../report v2.pdf" {
+		t.Fatalf("%v", s.got)
+	}
+
+	// The tool's own config directory holds the token and is never a target.
+	home := os.Getenv("HOME")
+	confDir := filepath.Join(home, ".config", "opencti-lookup")
+	if err := os.MkdirAll(confDir, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if code, _, errs := r("file", "x", "a.pdf", "--out", confDir); code != exitError || !strings.Contains(errs, "own directory") {
+		t.Fatalf("config dir accepted: %d %q", code, errs)
+	}
+	if code, _, _ := r("file", "only-one-arg"); code != exitError {
+		t.Fatal("file with one argument")
 	}
 }
 
