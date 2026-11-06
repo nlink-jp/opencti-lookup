@@ -1,0 +1,11 @@
+query Related($id: [String], $types: [String], $toTypes: [String], $first: Int, $after: ID) {
+  stixCoreRelationships(fromOrToId: $id, relationship_type: $types, toTypes: $toTypes, first: $first, after: $after) {
+    pageInfo { globalCount hasNextPage endCursor }
+    edges { node {
+      id relationship_type description start_time stop_time confidence
+      createdBy { name } objectMarking { definition }
+      from { ... on BasicObject { id entity_type } ... on StixCoreObject { representative { main } } ... on AttackPattern { x_mitre_id } }
+      to { ... on BasicObject { id entity_type } ... on StixCoreObject { representative { main } } ... on AttackPattern { x_mitre_id } }
+    } }
+  }
+}

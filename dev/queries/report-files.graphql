@@ -1,0 +1,6 @@
+query ReportFiles($id: String!) {
+  report(id: $id) {
+    name
+    importFiles(first: 50) { pageInfo { globalCount } edges { node { id name size lastModified metaData { mimetype version } } } }
+  }
+}

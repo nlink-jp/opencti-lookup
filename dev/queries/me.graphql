@@ -1,0 +1,10 @@
+query Me {
+  about { version }
+  me {
+    name user_email
+    capabilities { name }
+    allowed_marking { definition definition_type x_opencti_order }
+    max_shareable_marking { definition }
+    effective_confidence_level { max_confidence }
+  }
+}

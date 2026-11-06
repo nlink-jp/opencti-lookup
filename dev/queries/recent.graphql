@@ -1,0 +1,6 @@
+query Recent($filters: FilterGroup, $first: Int) {
+  reports(first: $first, filters: $filters, orderBy: created_at, orderMode: desc) {
+    pageInfo { globalCount }
+    edges { node { representative { main } created created_at updated_at published } }
+  }
+}

@@ -1,0 +1,13 @@
+query Entity($id: String!) {
+  stixCoreObject(id: $id) {
+    id standard_id entity_type created_at updated_at representative { main secondary }
+    createdBy { name } objectMarking { definition } objectLabel { value }
+    externalReferences(first: 500) { pageInfo { globalCount } edges { node { source_name url external_id description } } }
+    ... on StixDomainObject { confidence revoked created modified }
+    ... on IntrusionSet { name description aliases first_seen last_seen goals resource_level primary_motivation }
+    ... on Malware { name description aliases is_family malware_types }
+    ... on AttackPattern { name description x_mitre_id x_mitre_platforms killChainPhases { kill_chain_name phase_name } }
+    ... on Indicator { name description pattern pattern_type valid_from valid_until x_opencti_score revoked decay_base_score }
+    ... on Report { name description published report_types }
+  }
+}

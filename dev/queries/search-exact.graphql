@@ -1,0 +1,6 @@
+query SearchExact($filters: FilterGroup, $types: [String], $first: Int) {
+  stixDomainObjects(filters: $filters, types: $types, first: $first) {
+    pageInfo { globalCount }
+    edges { node { entity_type representative { main } } }
+  }
+}

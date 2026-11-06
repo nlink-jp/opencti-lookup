@@ -1,0 +1,12 @@
+query Sightings($filters: FilterGroup, $first: Int) {
+  stixSightingRelationships(first: $first, filters: $filters) {
+    pageInfo { globalCount hasNextPage }
+    edges { node {
+      id first_seen last_seen attribute_count x_opencti_negative confidence
+      createdBy { name }
+      objectMarking { definition }
+      from { ... on BasicObject { id entity_type } ... on StixCoreObject { representative { main } } }
+      to { ... on BasicObject { id entity_type } ... on StixCoreObject { representative { main } } }
+    } }
+  }
+}

@@ -1,0 +1,25 @@
+query LookupObservable($filters: FilterGroup, $search: String, $first: Int) {
+  stixCyberObservables(first: $first, filters: $filters, search: $search) {
+    pageInfo { globalCount hasNextPage endCursor }
+    edges { node {
+      id standard_id entity_type observable_value x_opencti_score created_at updated_at
+      createdBy { name }
+      objectMarking { definition definition_type x_opencti_order }
+      objectLabel { value }
+      indicators(first: 10) { pageInfo { globalCount } edges { node {
+        id standard_id name pattern pattern_type valid_from valid_until x_opencti_score confidence revoked
+        decay_base_score decay_applied_rule { decay_rule_id decay_lifetime }
+        createdBy { name }
+        objectMarking { definition }
+      } } }
+      containers(first: 10) { pageInfo { globalCount } edges { node {
+        id entity_type representative { main } created objectMarking { definition }
+      } } }
+      stixCoreRelationships(first: 10) { pageInfo { globalCount } edges { node {
+        relationship_type
+        from { ... on BasicObject { id entity_type } ... on StixCoreObject { representative { main } } }
+        to { ... on BasicObject { id entity_type } ... on StixCoreObject { representative { main } } }
+      } } }
+    } }
+  }
+}

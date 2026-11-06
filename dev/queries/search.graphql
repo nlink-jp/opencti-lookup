@@ -1,0 +1,6 @@
+query Search($search: String, $types: [String], $first: Int) {
+  stixDomainObjects(search: $search, types: $types, first: $first) {
+    pageInfo { globalCount hasNextPage }
+    edges { node { id entity_type representative { main } ... on IntrusionSet { aliases } ... on Malware { aliases } ... on ThreatActor { aliases } } }
+  }
+}
