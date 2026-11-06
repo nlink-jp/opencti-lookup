@@ -59,11 +59,20 @@ type FileInfo struct {
 	SHA256   string `json:"sha256"`
 }
 
-// GetFile writes the attachment named name of object id to w. The name must be
-// one the object lists (get_entity's files): the storage id is taken from the
+// FileHandle is an attachment found on an object, ready to fetch. Its storage
+// id stays inside the engine.
+type FileHandle struct {
+	Of   Ref
+	File FileRef
+}
+
+// FindFile resolves an object and one of its attachments by the name the
+// object lists (get_entity's files). The storage id is taken from the
 // listing, never built from the caller's string, so no argument can steer the
-// request to another path in the instance's storage.
-func (e *Engine) GetFile(ctx context.Context, id, name string, w io.Writer) (*FileInfo, error) {
+// download to another path in the instance's storage. The handle carries the
+// object's resolved internal id, so a saved name does not depend on which id
+// form the caller passed.
+func (e *Engine) FindFile(ctx context.Context, id, name string) (*FileHandle, error) {
 	if strings.TrimSpace(name) == "" {
 		return nil, invalid("name is required (the file name as get_entity lists it)")
 	}
@@ -84,38 +93,48 @@ func (e *Engine) GetFile(ctx context.Context, id, name string, w io.Writer) (*Fi
 		return nil, &Error{Code: CodeNotFound, Message: fmt.Sprintf("no object %q within what this key can see", id)}
 	}
 	files := out.Obj.ImportFiles.refs()
-	var file *FileRef
 	for i := range files {
-		if files[i].Name == name {
-			file = &files[i]
-			break
+		if files[i].Name != name {
+			continue
 		}
-	}
-	if file == nil {
-		names := make([]string, 0, len(files))
-		for _, f := range files {
-			names = append(names, fmt.Sprintf("%q", f.Name))
+		if files[i].Size > MaxFileBytes {
+			return nil, &Error{Code: opencti.CodeFileTooLarge, Message: fmt.Sprintf("%q is %d bytes; this tool saves at most %d MB", name, files[i].Size, MaxFileBytes>>20)}
 		}
-		listed := "it lists none"
-		if len(names) > 0 {
-			listed = "it lists " + strings.Join(names, ", ")
-		}
-		return nil, &Error{Code: CodeNotFound, Message: fmt.Sprintf("%s %q has no attachment named %q within what this key can see; %s", of.Type, of.Name, name, listed)}
+		return &FileHandle{Of: of, File: files[i]}, nil
 	}
-	if file.Size > MaxFileBytes {
-		return nil, &Error{Code: opencti.CodeFileTooLarge, Message: fmt.Sprintf("%q is %d bytes; this tool saves at most %d MB", name, file.Size, MaxFileBytes>>20)}
+	names := make([]string, 0, len(files))
+	for _, f := range files {
+		names = append(names, fmt.Sprintf("%q", f.Name))
 	}
+	listed := "it lists none"
+	if len(names) > 0 {
+		listed = "it lists " + strings.Join(names, ", ")
+	}
+	return nil, &Error{Code: CodeNotFound, Message: fmt.Sprintf("%s %q has no attachment named %q within what this key can see; %s", of.Type, of.Name, name, listed)}
+}
+
+// FetchFile streams a found attachment to w, hashing what it writes.
+func (e *Engine) FetchFile(ctx context.Context, h *FileHandle, w io.Writer) (*FileInfo, error) {
 	if err := e.ready(); err != nil {
 		return nil, err
 	}
-	h := sha256.New()
-	n, ctype, err := e.Client.Download(ctx, file.id, io.MultiWriter(w, h), MaxFileBytes)
+	sum := sha256.New()
+	n, ctype, err := e.Client.Download(ctx, h.File.id, io.MultiWriter(w, sum), MaxFileBytes)
 	if err != nil {
 		return nil, err
 	}
-	mime := file.MimeType
+	mime := h.File.MimeType
 	if mime == "" {
 		mime = ctype
 	}
-	return &FileInfo{Of: of, Name: file.Name, MimeType: mime, Bytes: n, SHA256: hex.EncodeToString(h.Sum(nil))}, nil
+	return &FileInfo{Of: h.Of, Name: h.File.Name, MimeType: mime, Bytes: n, SHA256: hex.EncodeToString(sum.Sum(nil))}, nil
+}
+
+// GetFile finds and fetches in one call (tests and the live suite).
+func (e *Engine) GetFile(ctx context.Context, id, name string, w io.Writer) (*FileInfo, error) {
+	h, err := e.FindFile(ctx, id, name)
+	if err != nil {
+		return nil, err
+	}
+	return e.FetchFile(ctx, h, w)
 }

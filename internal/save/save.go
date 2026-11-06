@@ -10,6 +10,7 @@ package save
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -30,11 +31,17 @@ type Saved struct {
 // maxNameRunes bounds the part of a saved name taken from upstream.
 const maxNameRunes = 100
 
-// FileName builds the saved name: the server's identity, the first characters
-// of the object id (ADR-021 §5: no workspace concept, so the name carries the
-// server and the source), and the upstream name reduced to characters that
-// mean nothing to a shell or a filesystem. The upstream name is third-party
-// text; nothing of its path survives, and it can never start with a dot.
+// FileName builds the saved name (ADR-021 §5: no workspace concept, so the
+// name carries the server and the source):
+//
+//	opencti-lookup-<first 8 of the object's internal id>-<8 hex of sha256(id, upstream name)>-<stem><ext>
+//
+// The upstream name is third-party text: its path is dropped and its stem and
+// extension are reduced to ASCII letters, digits, dot, hyphen and underscore.
+// That reduction can make two names alike (two Japanese names reduce to the
+// same stem), so a hash of the object id and the original name keeps them apart: two
+// attachments never share a saved name, and the same attachment of the same
+// object always gets the same one (a re-download replaces it).
 func FileName(objectID, upstream string) string {
 	id := strings.Map(func(r rune) rune {
 		if r < 128 && (unicode.IsLetter(r) || unicode.IsDigit(r)) {
@@ -48,16 +55,39 @@ func FileName(objectID, upstream string) string {
 	if id == "" {
 		id = "object"
 	}
+	sum := sha256.Sum256([]byte(objectID + "\x00" + upstream))
+	tag := hex.EncodeToString(sum[:4])
 
 	base := upstream
 	if i := strings.LastIndexAny(base, `/\`); i >= 0 {
 		base = base[i+1:]
 	}
+	ext := filepath.Ext(base)
+	if ext == base || len(ext) > 12 || strings.IndexFunc(ext[min(1, len(ext)):], func(r rune) bool { return !isASCIIAlnum(r) }) >= 0 {
+		ext = "" // a dot-file, an overlong or a non-plain extension is part of the stem
+	}
+	stem := reduce(strings.TrimSuffix(base, ext))
+	if stem == "" {
+		stem = "file"
+	}
+	if r := []rune(stem); len(r) > maxNameRunes {
+		stem = string(r[:maxNameRunes])
+	}
+	return "opencti-lookup-" + id + "-" + tag + "-" + stem + ext
+}
+
+func isASCIIAlnum(r rune) bool {
+	return r < 128 && (unicode.IsLetter(r) || unicode.IsDigit(r))
+}
+
+// reduce keeps ASCII letters, digits, dot, hyphen and underscore, turns runs
+// of anything else into one underscore, and trims dots, hyphens and
+// underscores from both ends so that nothing starts with a dot.
+func reduce(s string) string {
 	var b strings.Builder
 	lastUnderscore := false
-	for _, r := range base {
-		ok := r < 128 && (unicode.IsLetter(r) || unicode.IsDigit(r) || r == '.' || r == '-' || r == '_')
-		if !ok {
+	for _, r := range s {
+		if !(isASCIIAlnum(r) || r == '.' || r == '-' || r == '_') {
 			r = '_'
 		}
 		if r == '_' && lastUnderscore {
@@ -66,18 +96,7 @@ func FileName(objectID, upstream string) string {
 		lastUnderscore = r == '_'
 		b.WriteRune(r)
 	}
-	name := strings.Trim(b.String(), "._-")
-	if name == "" {
-		name = "file"
-	}
-	if r := []rune(name); len(r) > maxNameRunes {
-		ext := filepath.Ext(name)
-		if len(ext) > 16 {
-			ext = ""
-		}
-		name = string(r[:maxNameRunes-len([]rune(ext))]) + ext
-	}
-	return "opencti-lookup-" + id + "-" + name
+	return strings.Trim(b.String(), "._-")
 }
 
 // Save creates name inside dir with what fill writes, replacing a file of the

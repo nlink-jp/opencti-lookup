@@ -5,34 +5,59 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
 
 func TestFileName(t *testing.T) {
 	id := "84ec431c-fe0f-4b73-b1b1-bdc344fded85"
-	cases := map[string]string{
-		"fixture-report.pdf":      "opencti-lookup-84ec431c-fixture-report.pdf",
-		"escape attempt.txt":      "opencti-lookup-84ec431c-escape_attempt.txt",
-		"../../etc/passwd":        "opencti-lookup-84ec431c-passwd",
-		`..\..\win.ini`:           "opencti-lookup-84ec431c-win.ini",
-		".env":                    "opencti-lookup-84ec431c-env",
-		"報告書.pdf":                 "opencti-lookup-84ec431c-pdf",
-		"a;rm -rf ~;$(x).sh":      "opencti-lookup-84ec431c-a_rm_-rf_x_.sh",
-		"":                        "opencti-lookup-84ec431c-file",
-		"name\x00.pdf":            "opencti-lookup-84ec431c-name_.pdf",
-		"report.pdf\u202egpj.exe": "opencti-lookup-84ec431c-report.pdf_gpj.exe",
+	shape := regexp.MustCompile(`^opencti-lookup-84ec431c-[0-9a-f]{8}-[A-Za-z0-9._-]+$`)
+	cases := map[string]string{ // upstream name -> the stem and extension it keeps
+		"fixture-report.pdf":      "fixture-report.pdf",
+		"escape attempt.txt":      "escape_attempt.txt",
+		"../../etc/passwd":        "passwd",
+		`..\..\win.ini`:           "win.ini",
+		".env":                    "env",
+		"報告書.pdf":                 "file.pdf",
+		"a;rm -rf ~;$(x).sh":      "a_rm_-rf_x.sh",
+		"":                        "file",
+		"name\x00.pdf":            "name.pdf",
+		"report.pdf\u202egpj.exe": "report.pdf_gpj.exe",
+		"archive.tar.gz":          "archive.tar.gz",
+		"x.verylongextensionname": "x.verylongextensionname",
+		"notes.téxt":              "notes.t_xt",
 	}
-	for in, want := range cases {
-		if got := FileName(id, in); got != want {
-			t.Errorf("FileName(%q) = %q, want %q", in, got, want)
+	for in, keeps := range cases {
+		got := FileName(id, in)
+		if !shape.MatchString(got) || !strings.HasSuffix(got, "-"+keeps) {
+			t.Errorf("FileName(%q) = %q, want the shape ending in -%s", in, got, keeps)
+		}
+		if got != FileName(id, in) {
+			t.Errorf("FileName(%q) is not deterministic", in)
 		}
 	}
+
+	// Names that reduce alike stay apart (the pre-release review's collisions).
+	for _, pair := range [][2]string{
+		{"報告書.pdf", "別紙.pdf"},
+		{"IOC一覧.csv", "IOCリスト.csv"},
+		{"a b.txt", "a_b.txt"},
+	} {
+		if FileName(id, pair[0]) == FileName(id, pair[1]) {
+			t.Errorf("%q and %q share a saved name", pair[0], pair[1])
+		}
+	}
+	// The same name on another object is another file.
+	if FileName(id, "r.pdf") == FileName("84ec431c-0000-0000-0000-000000000000", "r.pdf") {
+		t.Error("two objects whose ids share 8 characters share a saved name")
+	}
+
 	long := FileName(id, strings.Repeat("a", 300)+".pdf")
-	if !strings.HasSuffix(long, ".pdf") || len(long) > len("opencti-lookup-84ec431c-")+maxNameRunes {
+	if !strings.HasSuffix(long, ".pdf") || len(long) > len("opencti-lookup-84ec431c-01234567-")+maxNameRunes+len(".pdf") {
 		t.Fatalf("long name %q (%d)", long, len(long))
 	}
-	if got := FileName("!!", "x"); got != "opencti-lookup-object-x" {
+	if got := FileName("!!", "x"); !strings.HasPrefix(got, "opencti-lookup-object-") {
 		t.Fatalf("%q", got)
 	}
 }

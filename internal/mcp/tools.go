@@ -63,7 +63,8 @@ type Engine interface {
 	GetReports(ctx context.Context, id string, limit int, cursor string) (*engine.ReportsResult, error)
 	ServerStatus(ctx context.Context) *engine.Status
 	ListRecent(ctx context.Context, q engine.RecentQuery) (*engine.RecentResult, error)
-	GetFile(ctx context.Context, id, name string, w io.Writer) (*engine.FileInfo, error)
+	FindFile(ctx context.Context, id, name string) (*engine.FileHandle, error)
+	FetchFile(ctx context.Context, h *engine.FileHandle, w io.Writer) (*engine.FileInfo, error)
 }
 
 func obj(props map[string]any, required ...string) map[string]any {
@@ -349,16 +350,22 @@ func (s *Server) GetReportFile(ctx context.Context, id, name, workDirArg string)
 	if err != nil {
 		return nil, err
 	}
-	file := save.FileName(id, name)
+	// Find the attachment first: the saved name is built from the object's
+	// resolved internal id, whichever id form the caller passed.
+	h, err := s.Eng.FindFile(ctx, id, name)
+	if err != nil {
+		return nil, err
+	}
+	file := save.FileName(h.Of.ID, h.File.Name)
 	target := filepath.Join(dir, file)
 	if reason, why := s.WorkDirs.LocalPath(target, target); why != "" {
 		return nil, &workdir.Error{Code: workdir.CodeDenied, Message: why, Details: map[string]any{"path": target, "reason": reason}}
 	}
 	var info *engine.FileInfo
 	saved, err := save.Save(dir, file, func(w io.Writer) error {
-		var gerr error
-		info, gerr = s.Eng.GetFile(ctx, id, name, w)
-		return gerr
+		var ferr error
+		info, ferr = s.Eng.FetchFile(ctx, h, w)
+		return ferr
 	})
 	if err != nil {
 		return nil, err

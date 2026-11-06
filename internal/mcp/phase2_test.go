@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/nlink-jp/opencti-lookup/internal/engine"
+	"github.com/nlink-jp/opencti-lookup/internal/save"
 	"github.com/nlink-jp/pathguard"
 	"github.com/nlink-jp/pathguard/workdir"
 )
@@ -78,8 +79,9 @@ func TestGetReportFile(t *testing.T) {
 	var res map[string]any
 	_ = json.Unmarshal([]byte(text), &res)
 	resolved, _ := filepath.EvalSymlinks(work)
-	if res["work_dir"] != resolved || res["path"] != "opencti-lookup-84ec431c-escape_attempt.txt" ||
-		res["abs_path"] != filepath.Join(resolved, "opencti-lookup-84ec431c-escape_attempt.txt") || res["sha256"] != "sha" {
+	want := save.FileName("84ec431c-fe0f-4b73-b1b1-bdc344fded85", "../escape attempt.txt")
+	if res["work_dir"] != resolved || res["path"] != want || !strings.HasSuffix(want, "-escape_attempt.txt") ||
+		res["abs_path"] != filepath.Join(resolved, want) || res["sha256"] != "sha" {
 		t.Fatalf("%v", res)
 	}
 	if b, err := os.ReadFile(res["abs_path"].(string)); err != nil || string(b) != "attachment body" {

@@ -59,18 +59,23 @@ func (s *stubEngine) ListRecent(_ context.Context, q engine.RecentQuery) (*engin
 	s.note("recent", q)
 	return &engine.RecentResult{Type: q.Type, Rows: []engine.RecentRow{}}, s.err
 }
-func (s *stubEngine) GetFile(_ context.Context, id, name string, w io.Writer) (*engine.FileInfo, error) {
+func (s *stubEngine) FindFile(_ context.Context, id, name string) (*engine.FileHandle, error) {
 	s.note("file", id+"/"+name)
 	if s.err != nil {
 		return nil, s.err
 	}
+	return &engine.FileHandle{Of: engine.Ref{ID: "84ec431c-fe0f-4b73-b1b1-bdc344fded85", Name: "R1", Type: "Report"}, File: engine.FileRef{Name: name}}, nil
+}
+func (s *stubEngine) FetchFile(_ context.Context, h *engine.FileHandle, w io.Writer) (*engine.FileInfo, error) {
 	n, _ := io.WriteString(w, "attachment body")
-	return &engine.FileInfo{Name: name, Bytes: int64(n), SHA256: "sha"}, nil
+	return &engine.FileInfo{Of: h.Of, Name: h.File.Name, Bytes: int64(n), SHA256: "sha", MimeType: mimeOf(s)}, nil
 }
 func (s *stubEngine) ServerStatus(context.Context) *engine.Status {
 	s.note("status", true)
 	return &engine.Status{Version: "6.7.4", VerifiedVersion: "6.7.4"}
 }
+
+func mimeOf(*stubEngine) string { return "text/plain" }
 
 // exchange runs the server over the given frames and returns its replies.
 func exchange(t *testing.T, eng Engine, frames ...string) []map[string]any {

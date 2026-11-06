@@ -14,6 +14,7 @@ import (
 	"github.com/nlink-jp/opencti-lookup/internal/engine"
 	"github.com/nlink-jp/opencti-lookup/internal/mcp"
 	"github.com/nlink-jp/opencti-lookup/internal/opencti"
+	"github.com/nlink-jp/opencti-lookup/internal/save"
 )
 
 // hostile is third-party text that tries to drive the terminal: an escape
@@ -21,6 +22,7 @@ import (
 const hostile = "evil\x1b[2J\u202ename\rforged"
 
 type stub struct {
+	mime   string // what FetchFile reports as the attachment's type
 	err    error
 	lookup *engine.LookupResult
 	status *engine.Status
@@ -56,19 +58,29 @@ func (s *stub) ListRecent(_ context.Context, q engine.RecentQuery) (*engine.Rece
 	s.got = []string{q.Type, q.Axis, fmt.Sprint(q.Days)}
 	return &engine.RecentResult{Type: q.Type, Axis: q.Axis, Rows: []engine.RecentRow{{Ref: engine.Ref{Name: "R1", Type: "Report"}}}}, s.err
 }
-func (s *stub) GetFile(_ context.Context, id, name string, w io.Writer) (*engine.FileInfo, error) {
+func (s *stub) FindFile(_ context.Context, id, name string) (*engine.FileHandle, error) {
 	s.got = []string{id, name}
 	if s.err != nil {
 		return nil, s.err
 	}
+	return &engine.FileHandle{Of: engine.Ref{ID: "84ec431c-fe0f-4b73-b1b1-bdc344fded85", Name: "R1", Type: "Report"}, File: engine.FileRef{Name: name}}, nil
+}
+func (s *stub) FetchFile(_ context.Context, h *engine.FileHandle, w io.Writer) (*engine.FileInfo, error) {
 	n, _ := io.WriteString(w, "attachment body")
-	return &engine.FileInfo{Name: name, Bytes: int64(n), SHA256: "sha"}, nil
+	return &engine.FileInfo{Of: h.Of, Name: h.File.Name, Bytes: int64(n), SHA256: "sha", MimeType: mimeOf(s)}, nil
 }
 func (s *stub) ServerStatus(context.Context) *engine.Status {
 	if s.status != nil {
 		return s.status
 	}
 	return &engine.Status{Version: "6.7.4", VerifiedVersion: "6.7.4", VersionMatches: true, ConfigFile: "(none)"}
+}
+
+func mimeOf(s *stub) string {
+	if s.mime != "" {
+		return s.mime
+	}
+	return "text/plain"
 }
 
 // setup isolates the config and installs the stub; it returns a runner.
@@ -232,16 +244,20 @@ func TestFileCommand(t *testing.T) {
 	s := &stub{}
 	r := setup(t, s)
 	out := t.TempDir()
-	code, stdout, errs := r("file", "84ec431c-xyz", "../report v2.pdf", "--out", out)
+	code, stdout, errs := r("file", "report--0a49", "../report v2.pdf", "--out", out)
 	if code != exitOK {
 		t.Fatalf("%d %q", code, errs)
 	}
-	saved := filepath.Join(out, "opencti-lookup-84ec431c-report_v2.pdf")
+	// Named from the resolved internal id, not the id form the caller passed.
+	name := save.FileName("84ec431c-fe0f-4b73-b1b1-bdc344fded85", "../report v2.pdf")
 	resolved, _ := filepath.EvalSymlinks(out)
-	if b, err := os.ReadFile(saved); err != nil || string(b) != "attachment body" || !strings.Contains(stdout, filepath.Join(resolved, "opencti-lookup-84ec431c-report_v2.pdf")) {
+	if b, err := os.ReadFile(filepath.Join(out, name)); err != nil || string(b) != "attachment body" || !strings.Contains(stdout, filepath.Join(resolved, name)) {
 		t.Fatalf("%q %v %q", b, err, stdout)
 	}
-	if strings.Join(s.got, ",") != "84ec431c-xyz,../report v2.pdf" {
+	if !strings.HasPrefix(name, "opencti-lookup-84ec431c-") || !strings.HasSuffix(name, "-report_v2.pdf") {
+		t.Fatalf("name %q", name)
+	}
+	if strings.Join(s.got, ",") != "report--0a49,../report v2.pdf" {
 		t.Fatalf("%v", s.got)
 	}
 
