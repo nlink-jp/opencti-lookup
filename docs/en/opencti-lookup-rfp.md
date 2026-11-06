@@ -36,20 +36,20 @@ CLI to isolate it.
 
 | Tool | Question it answers |
 |---|---|
-| `lookup_ioc` | For IP, domain, URL, hash or email values (several at once, capped): the matching observables and indicators with score, confidence, labels, markings (TLP etc.), author, validity window, sightings (when, where, how often observed, and false-positive sightings via `x_opencti_negative`), the reports containing them and a summary of `indicates` and similar relationships. **Not found is a normal result**, worded as "nothing within what this key can see" (not registered and not visible are indistinguishable) |
-| `search_threats` | Search threat actors, intrusion sets, campaigns, malware, tools, attack patterns, vulnerabilities and reports. **Exact match on name, alias or ATT&CK id is tried first**, then full-text search (relevance-ordered, capped); the type is an enum |
+| `lookup_ioc` | For IP, domain, URL, hash or email values (several at once, capped): the matching observables and indicators, **looked up both through observables and through indicators** and grouped per value (some indicators have no observable), with score, confidence, labels, markings (TLP etc.), author, validity window, sightings (when, where, how often observed, and false-positive sightings via `x_opencti_negative`), the reports containing them and a summary of `indicates` and similar relationships. **Not found is a normal result**, worded as "nothing within what this key can see" (not registered and not visible are indistinguishable) |
+| `search_threats` | Search threat actors, intrusion sets, campaigns, malware, tools, attack patterns, vulnerabilities and reports. **Exact match on name, alias or ATT&CK id is tried first** (several exact matches are possible; ATT&CK ids work for attack patterns only), then full-text search (relevance-ordered, capped, its total never shown as a match count); the type is an enum |
 | `get_entity` | One object in detail (description, aliases, external references, markings, author, and for an indicator its pattern) |
-| `get_related` | Walk relationships from one object, filtered by relationship type and target type, with a limit and cursor paging. Per-relationship descriptions are omitted by default and added on request (most of the ~75 KB for APT28's 93 techniques was descriptions) |
-| `get_reports` | The containers (report, note, grouping) holding an object. In OpenCTI this is containment (`objects`), not a relationship, hence separate from `get_related` |
-| `server_status` | Connection check: OpenCTI version and whether it matches the verified version (6.7.4), the key's user name, capabilities and visible markings, and whether TLS is verified |
+| `get_related` | Walk relationships from one object, filtered by relationship type and target type (validated against an enum), with a limit and cursor paging. The starting object is returned once, not repeated on every row. Per-relationship descriptions are omitted by default and added on request (of APT28's 93 techniques, ~78 KB: descriptions 32%, repeated ends 34%). A nonexistent id answers not_found rather than zero rows |
+| `get_reports` | The containers (report, note, grouping) holding an object. In OpenCTI this is containment (`objects`), not a relationship, hence separate from `get_related`. Nested `containers` cannot page, so the root `containers(filters: objects)` is used |
+| `server_status` | Connection check: OpenCTI version and whether it matches the verified version (6.7.4), the key's user name, capabilities and visible markings, whether TLS is verified, whether the URL is plain http, and the config file actually read |
 | `get_usage` | The manual an agent reads first (tools, arguments, error codes, worked query examples) |
 
 **Phase 2 MCP tools**
 
 | Tool | Question it answers |
 |---|---|
-| `list_recent` | Reports and indicators from the last N days, on a selectable date axis: ingestion time `created_at` (default, "new to this instance"), the source's creation time `created`, or publication date `published` |
-| `get_report_file` | Save a report's attached file (PDF etc.) under `<work_dir>/<workspace_id>/` and return its path, size and type |
+| `list_recent` | Reports and indicators from the last N days, on a selectable date axis: ingestion time `created_at` (default, "new to this instance"), the source's creation time `created`, or publication date `published`. The axes each type supports are validated (an axis a type lacks returns zero rows, not an error) |
+| `get_report_file` | Save a report's attached file (PDF etc.) and return its size, type and destination. Having no workspace concept, it writes directly under `<work_dir>` with the server's name in the file name (ADR-021 §5) and returns `work_dir`, `path` and `abs_path` (§6). File names are third-party strings; the saved name is built by the tool |
 
 ATT&CK technique lists, targeted sectors and the actors exploiting a CVE are all
 reachable through `get_related` filters, so they get worked examples in
@@ -67,26 +67,57 @@ siblings). Every subcommand, `mcp` included, accepts `--config <path>`.
   Spilling a large response to disk is the calling runtime's job (gem-agent
   ADR-0058, lagent ADR-0039, Claude Code's MCP output limit)
 - The cap applies to the **whole response**, aggregates and reference lists
-  included (the otx-lookup 162 KB lesson)
+  included (the otx-lookup 162 KB lesson), in three tiers:
+  1. list length (call argument, configured default and ceiling; below OpenCTI's 5,000-row page ceiling)
+  2. over-long strings (descriptions and the like) are shortened, marked, and their original length given
+  3. a whole-response ceiling; past it, items are dropped from the tail and counted
+- **A short answer is detected by comparing the total with the rows received.**
+  OpenCTI silently cuts `first` above 5,000 to 5,000 and reports `hasNextPage: false`
+  (`hasNextPage` is not trusted)
 - Every result carries markings, author and confidence. **No verdict
   (malicious/benign) is computed**; OpenCTI's score is passed through
 - Errors are structured (`{code, message}`) and distinguish missing permission
   (`forbidden`), authentication failure, not found, connection failure and version mismatch
-- **OpenCTI always answers HTTP 200.** Errors are classified by the body's
+- **Most OpenCTI errors arrive with HTTP 200**, their kind in the body's
   `errors[].extensions.code` (`AUTH_REQUIRED`, `FORBIDDEN_ACCESS`, `FUNCTIONAL_ERROR`,
-  `BAD_USER_INPUT`, …). Storage's `HTTP 503` with `File not found or restricted` means
-  "absent or not visible" and is kept apart from a connection failure
+  `UNSUPPORTED_ERROR`, `DATABASE_ERROR`, `GRAPHQL_PARSE_FAILED`, `GRAPHQL_VALIDATION_FAILED`, …).
+  Classification uses both HTTP status and `extensions.code`. Storage answers `HTTP 503` with
+  `File not found or restricted` for "absent or not visible" and `HTTP 403` for an
+  authentication failure; both are kept apart from a connection failure
+- Internal detail such as `extensions.cause` (which carries Elasticsearch query bodies and internal ids) is never passed on
 - **Partial success is never a complete answer.** Any entry in `errors` yields a
   structured error (a field the key may not read comes back `null` while the others return)
+- **Bad inputs that OpenCTI answers with zero rows are stopped beforehand.** A nonexistent
+  id, a nonexistent type name or a date axis a type lacks returns zero rows, not an error.
+  Values are validated against enums and ranges, and tools that take an id check the
+  object exists first and answer not_found
 - A failed query is never reported as "nothing found"
+
+**CLI exit codes** (as in the sibling lookups)
+
+| Code | Meaning |
+|---|---|
+| 0 | Answered (an empty answer is a valid answer) |
+| 1 | An upstream failure prevented some queries (`INCONCLUSIVE` in the output; what succeeded is printed) |
+| 2 | Invalid input or configuration |
+
+An empty result is reported as "nothing found" only when every query succeeded.
 
 **`lookup_ioc` query rules** (from the Phase 0 measurements)
 
-- Lookup is an exact `eq` on `value`. Full-text search matches prefix-like and is not used
-- IPv4 / IPv6 are canonicalized with `net/netip` before querying (non-canonical IPv6 does not match)
-- A hash is classified as MD5 / SHA-1 / SHA-256 by length and queried under `hashes.<algorithm>` (`value` does not match)
-- OpenCTI matches case-insensitively
-- Sightings come from one `stixSightingRelationships(filters: fromId)` query over the array of indicator ids
+- **Two paths, grouped per value**
+  - observables: exact `eq` on `stixCyberObservables` `value` (hashes under `hashes.<algorithm>`)
+  - indicators: candidates whose `pattern` `contains` the value, then the returned patterns are
+    parsed in the tool and only exact value matches kept (`contains` matches substrings).
+    Indicators with no observable are found only this way
+- Full-text search matches prefix-like and is not used
+- **OpenCTI does not canonicalize stored values.** For IPv4 / IPv6 the input as given and the
+  `net/netip` canonical form (and the expanded form for IPv6) are all queried under `or`.
+  OpenCTI matches case-insensitively (URL paths included)
+- When the match was in a different form than the input (case, IP notation), the stored form is returned with a note saying so
+- A hash is classified by length — MD5 (32), SHA-1 (40), SHA-256 (64), SHA-512 (128) — (`value` does not match)
+- In multi-value lookups, results are mapped back to inputs by normalized value
+- Sightings come from one `stixSightingRelationships(filters: fromId)` query over the array of indicator and observable ids
 - **Decay is passed through uninterpreted.** OpenCTI rewrites an indicator's `valid_until`,
   `x_opencti_score` and `revoked` under its decay rules. Revoked indicators are not hidden;
   `revoked`, the current score, `decay_base_score` and `valid_until` are reported side by side,
@@ -96,14 +127,21 @@ siblings). Every subcommand, `mcp` included, accepts `--config <path>`.
 
 ### Configuration
 
-- Default location: `~/.config/opencti-lookup/config.toml` (honours XDG_CONFIG_HOME)
+- Default locations are searched in order and the first that exists is used (knowledge
+  config-and-io): `$XDG_CONFIG_HOME/opencti-lookup/config.toml` → `~/.config/opencti-lookup/config.toml`
+  → `~/Library/Application Support/opencti-lookup/config.toml`. `server_status` and the CLI
+  diagnostics show the path actually read, or the list of paths searched
+- A config file whose permissions are not 0600 draws a warning on stderr (CONVENTIONS)
 - `--config <path>` selects another file. **An explicitly named file that does not
   exist stops with an error naming the path** (the siblings silently continue as
   if no file were given; that makes isolation on the production machine harder,
   so this tool differs). A missing file at the default location is not an error
 - Precedence: flag > environment (`OPENCTI_LOOKUP_*`) > config file > default
 - Settings
-  - `url` (required)
+  - `url` (required). `https://` is recommended, but **`http://` is accepted** (the user's
+    decision). Over plain http the CLI warns once at start-up that the token travels
+    unencrypted, and `server_status` reports it (CONVENTIONS: tools that send credentials
+    over unencrypted HTTP must warn)
   - `token` (required; also `OPENCTI_LOOKUP_TOKEN`; never printed, logged or put in a URL)
   - `ca_file` (trust a self-signed or internal-CA certificate)
   - `insecure_skip_verify` (default false; also `--insecure`)
@@ -126,7 +164,8 @@ siblings). Every subcommand, `mcp` included, accepts `--config <path>`.
   official client) is Python; from Go the GraphQL API is called directly over net/http
 - **Organization building blocks**
   - Config parsing: `nlink-jp/toml` (ADR-026)
-  - Release: the shared release kit (ADR-028)
+  - Release and signing wiring: copies of the CONVENTIONS templates (ADR-028's shared kit
+    was withdrawn; copying is the current way)
   - Path judgement for `get_report_file`: `nlink-jp/pathguard` (ADR-022, amending ADR-021 §4, §7, §10)
   - MCP skeleton transplanted from the newest sibling (chosen per package by `git log`)
 - **No existing OpenCTI MCP server is adopted.** No official Filigran MCP server
@@ -231,11 +270,15 @@ Reason: it is the same kind of tool as the read-only threat-intelligence lookups
 - **Version dependence**: the GraphQL schema changes between OpenCTI versions.
   Only 6.7.4, the production version, is verified; `server_status` warns on a mismatch
 - **Measured in Phase 0** (details in the measurement record)
-  - `first: 5000` returned 1,379 rows at once; any higher ceiling is unmeasured
-    for lack of data. A negative `first` is an error
-  - GraphQL introspection is refused; the schema is read from the OpenCTI
-    repository at tag 6.7.4 (some types, such as Indicator, exist only under `src/modules/`)
-  - HTTP is always 200 (errors in `extensions.code`); storage answers "absent or not visible" with 503
+  - The page ceiling is 5,000 rows. Asking for more is silently cut to 5,000 with
+    `hasNextPage: false`. A negative `first` is a `DATABASE_ERROR`
+  - Whole-schema introspection (`__schema`) is refused with HTTP 500 (`__type` works).
+    The schema is read from the OpenCTI repository at tag 6.7.4 (some types, such as
+    Indicator, exist only under `src/modules/`)
+  - Errors mostly arrive as HTTP 200 with `extensions.code`; storage answers "absent or
+    not visible" with 503 and an authentication failure with 403
+  - A nonexistent id, type name or filter axis returns zero rows, not an error
+  - OpenCTI does not canonicalize stored values (an IPv6 stored expanded does not match its canonical form)
   - "Not registered" and "not visible to this key" are indistinguishable
   - Full-text search is relevance-ordered and its total is not a match count
 - **Rate limits**: OpenCTI's own default limit is unconfirmed, and a reverse proxy
@@ -306,3 +349,14 @@ Reason: it is the same kind of tool as the read-only threat-intelligence lookups
     were applied with the user's approval (error classification, `lookup_ioc` query
     rules and decay, exact match first in `search_threats`, descriptions omitted in
     `get_related`, the date axis of `list_recent`, the permission results, constraints)
+16. **Independent verification** (design finalization): a sub-agent recounted the
+    measurements from the captures and the live stack and checked the design against the
+    recorded lessons. Every finding, including the heavy ones (the 5,000-row page ceiling
+    that truncates silently with `hasNextPage` false; citing the withdrawn ADR-028), was
+    confirmed by recapturing before being adopted. The measurement record was corrected as
+    its second edition (§11 there), and the RFP gained: two lookup paths and stored-form
+    handling, the three-tier cap and short-answer detection, the extended error
+    classification with internal detail withheld, pre-validation of inputs, CLI exit codes,
+    the config search order and 0600 warning, and `get_report_file` following ADR-021 §5–§6
+17. **Plain http**: the verifier proposed refusing non-loopback http as shodan-lookup does;
+    by the user's decision it is accepted with a warning (CONVENTIONS requires a warning)
