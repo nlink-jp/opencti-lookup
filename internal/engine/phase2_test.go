@@ -29,7 +29,8 @@ func TestListRecent(t *testing.T) {
 		t.Fatalf("%+v", res)
 	}
 	vars, _ := json.Marshal(f.varsOf("Recent"))
-	if !strings.Contains(string(vars), `"created_at"`) || !strings.Contains(string(vars), `"gte"`) || !strings.Contains(string(vars), "2026-10-30") {
+	if !strings.Contains(string(vars), `"created_at"`) || !strings.Contains(string(vars), `"gte"`) || !strings.Contains(string(vars), "2026-10-30") ||
+		!strings.Contains(string(vars), `"lte"`) || !strings.Contains(string(vars), "2026-11-06T12:00:00.000Z") || res.Until != "2026-11-06T12:00:00.000Z" {
 		t.Fatalf("filter %s", vars)
 	}
 
@@ -59,8 +60,23 @@ func TestListRecentKeepsItsWindow(t *testing.T) {
 	if err != nil || second.Since != first.Since {
 		t.Fatalf("since moved from %s to %s (%v)", first.Since, second.Since, err)
 	}
+	if second.Until != first.Until {
+		t.Fatalf("until moved from %s to %s", first.Until, second.Until)
+	}
 	if _, err := newEngine(f).ListRecent(context.Background(), RecentQuery{Limit: 1, Days: 30, Cursor: first.NextCursor}); Code(err) != CodeInvalidArgument {
 		t.Fatalf("a cursor for 7 days was accepted for 30: %v", err)
+	}
+	// A forged window is refused, never sent.
+	fp := fingerprint("recent", "report", "created_at", "7")
+	for _, until := range []string{"2999-01-01T00:00:00.000Z", "garbage", "2026-11-09"} {
+		f.calls = nil
+		forged := encodeCursor(cursor{After: "E", Seen: 1, Query: fp, Until: until})
+		if _, err := newEngine(f).ListRecent(context.Background(), RecentQuery{Limit: 1, Cursor: forged}); Code(err) != CodeInvalidArgument {
+			t.Errorf("until %q: %v", until, err)
+		}
+		if len(f.calls) != 0 {
+			t.Errorf("until %q reached the instance", until)
+		}
 	}
 }
 

@@ -53,6 +53,7 @@ type RelatedResult struct {
 	Of                Ref          `json:"of"`
 	RelationshipTypes []string     `json:"relationship_types,omitempty"`
 	TargetTypes       []string     `json:"target_types,omitempty"`
+	WithDescriptions  bool         `json:"with_descriptions,omitempty"`
 	Rows              []RelatedRow `json:"relationships"`
 	Page
 }
@@ -151,7 +152,7 @@ func (e *Engine) GetRelated(ctx context.Context, q RelatedQuery) (*RelatedResult
 		}
 		return nil, err
 	}
-	res := &RelatedResult{Of: of, Rows: []RelatedRow{}, RelationshipTypes: q.RelationshipTypes, TargetTypes: targets}
+	res := &RelatedResult{Of: of, Rows: []RelatedRow{}, RelationshipTypes: q.RelationshipTypes, TargetTypes: targets, WithDescriptions: q.WithDescriptions}
 	for _, edge := range out.Conn.Edges {
 		w := edge.Node
 		dir, other := "outgoing", w.To

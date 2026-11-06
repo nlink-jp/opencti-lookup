@@ -276,6 +276,9 @@ func renderRelated(w io.Writer, r *engine.RelatedResult) {
 	for _, tt := range r.TargetTypes {
 		cmd += " --target-type " + tt
 	}
+	if r.WithDescriptions {
+		cmd += " --descriptions"
+	}
 	page(w, r.Page, cmd)
 }
 

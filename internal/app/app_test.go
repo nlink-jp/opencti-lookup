@@ -47,7 +47,7 @@ func (s *stub) GetEntity(_ context.Context, id string) (*engine.Entity, error) {
 }
 func (s *stub) GetRelated(_ context.Context, q engine.RelatedQuery) (*engine.RelatedResult, error) {
 	s.got = append([]string{q.ID}, append(q.RelationshipTypes, q.TargetTypes...)...)
-	return &engine.RelatedResult{Of: engine.Ref{ID: q.ID}, RelationshipTypes: q.RelationshipTypes, TargetTypes: q.TargetTypes,
+	return &engine.RelatedResult{Of: engine.Ref{ID: q.ID}, RelationshipTypes: q.RelationshipTypes, TargetTypes: q.TargetTypes, WithDescriptions: q.WithDescriptions,
 		Rows: []engine.RelatedRow{{Relationship: "uses", Direction: "outgoing"}},
 		Page: engine.Page{Total: 3, Returned: 1, Remaining: 2, Limit: 1, NextCursor: "CUR"}}, s.err
 }
@@ -150,8 +150,8 @@ func TestFlagsAfterArguments(t *testing.T) {
 	if strings.Join(s.got, ",") != "ID,uses,Malware,Tool" {
 		t.Fatalf("related got %v", s.got)
 	}
-	_, out, _ = r("related", "ID", "--relationship", "targets", "--target-type", "Sector", "--limit", "1")
-	if !strings.Contains(out, "opencti-lookup related ID --relationship targets --target-type Sector --limit 1 --cursor CUR") {
+	_, out, _ = r("related", "ID", "--relationship", "targets", "--target-type", "Sector", "--limit", "1", "--descriptions")
+	if !strings.Contains(out, "opencti-lookup related ID --relationship targets --target-type Sector --descriptions --limit 1 --cursor CUR") {
 		t.Fatalf("the continuation drops a filter: %q", out)
 	}
 }

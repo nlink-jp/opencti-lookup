@@ -112,13 +112,13 @@ func (e *Engine) limit(n int) (int, error) {
 // a two-item list of two), so whether more remains is computed from the
 // total. The query fingerprint makes a cursor from one list unusable on
 // another — OpenCTI would answer a foreign cursor with a DATABASE_ERROR or a
-// wrong page — and Since pins list_recent's window across pages, so new
-// arrivals do not shift the count.
+// wrong page — and Until closes list_recent's window at the first page's
+// time, so the pages of one listing count the same objects.
 type cursor struct {
 	After string `json:"a"`
 	Seen  int    `json:"s"`
 	Query string `json:"q"`
-	Since string `json:"t,omitempty"`
+	Until string `json:"t,omitempty"` // list_recent: the first page's time, closing the window
 }
 
 func encodeCursor(c cursor) string {
@@ -169,7 +169,7 @@ func pageOf(total, returned, limit int, prev cursor, endCursor string) Page {
 	if total > seen {
 		p.Remaining = total - seen
 		if returned > 0 && endCursor != "" {
-			p.NextCursor = encodeCursor(cursor{After: endCursor, Seen: seen, Query: prev.Query, Since: prev.Since})
+			p.NextCursor = encodeCursor(cursor{After: endCursor, Seen: seen, Query: prev.Query, Until: prev.Until})
 		}
 	}
 	return p

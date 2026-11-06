@@ -26,6 +26,9 @@ const MaxRecentDays = 365
 // DefaultRecentDays is the window when the caller gives none.
 const DefaultRecentDays = 7
 
+// recentTimeLayout is how list_recent writes the window's bounds.
+const recentTimeLayout = "2006-01-02T15:04:05.000Z"
+
 // now is replaced in tests.
 var now = time.Now
 
@@ -44,6 +47,7 @@ type RecentResult struct {
 	Axis  string      `json:"axis"`
 	Days  int         `json:"days"`
 	Since string      `json:"since"`
+	Until string      `json:"until"`
 	Rows  []RecentRow `json:"items"`
 	Page
 }
@@ -101,11 +105,21 @@ func (e *Engine) ListRecent(ctx context.Context, q RecentQuery) (*RecentResult, 
 	if err != nil {
 		return nil, err
 	}
-	since := cur.Since // a continuation keeps its first page's window
-	if since == "" {
-		since = now().UTC().Add(-time.Duration(q.Days) * 24 * time.Hour).Format("2006-01-02T15:04:05.000Z")
-		cur.Since = since
+	// The window is [until - days, until], with until the first page's time:
+	// a continuation keeps it, so later arrivals neither enter the count nor
+	// the pages. A cursor's until is checked: it must be a time this tool
+	// wrote and not in the future (a forged one would yield a silent zero or a
+	// DATABASE_ERROR, or step outside the 1-365-day bound).
+	until := now().UTC()
+	if cur.Until != "" {
+		t, err := time.Parse(recentTimeLayout, cur.Until)
+		if err != nil || t.After(now().UTC().Add(5*time.Minute)) {
+			return nil, invalid("cursor is not one this tool issued (pass next_cursor from a previous answer unchanged)")
+		}
+		until = t
 	}
+	cur.Until = until.Format(recentTimeLayout)
+	since := until.Add(-time.Duration(q.Days) * 24 * time.Hour).Format(recentTimeLayout)
 
 	root, fields := "reports", `published report_types`
 	if q.Type == "indicator" {
@@ -122,6 +136,7 @@ func (e *Engine) ListRecent(ctx context.Context, q RecentQuery) (*RecentResult, 
 	vars := map[string]any{
 		"filters": map[string]any{"mode": "and", "filterGroups": []any{}, "filters": []any{
 			map[string]any{"key": []string{q.Axis}, "values": []string{since}, "operator": "gte"},
+			map[string]any{"key": []string{q.Axis}, "values": []string{cur.Until}, "operator": "lte"},
 		}},
 		"first": n,
 	}
@@ -149,7 +164,7 @@ func (e *Engine) ListRecent(ctx context.Context, q RecentQuery) (*RecentResult, 
 		return nil, err
 	}
 	conn := out[root]
-	res := &RecentResult{Type: q.Type, Axis: q.Axis, Days: q.Days, Since: since, Rows: []RecentRow{}}
+	res := &RecentResult{Type: q.Type, Axis: q.Axis, Days: q.Days, Since: since, Until: cur.Until, Rows: []RecentRow{}}
 	for _, edge := range conn.Edges {
 		w := edge.Node
 		r := RecentRow{Ref: ref(w.wireRef), CreatedAt: w.CreatedAt, Created: w.Created, Published: w.Published,
