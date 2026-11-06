@@ -34,7 +34,7 @@ func (c *Client) Download(ctx context.Context, fileID string, w io.Writer, max i
 	req.Header.Set("Authorization", "Bearer "+c.token)
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return 0, "", transportError(err)
+		return 0, "", transportError(err, c.host)
 	}
 	defer func() { _ = resp.Body.Close() }()
 

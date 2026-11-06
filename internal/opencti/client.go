@@ -16,12 +16,12 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/nlink-jp/opencti-lookup/internal/config"
@@ -69,6 +69,7 @@ func Code(err error) string {
 // Client talks to one OpenCTI instance.
 type Client struct {
 	base  string
+	host  string // for explaining a certificate that names another host
 	token string
 	http  *http.Client
 }
@@ -95,7 +96,11 @@ func New(cfg *config.Config) *Client {
 
 // NewWithHTTP builds a client over a given http.Client (tests).
 func NewWithHTTP(base, token string, hc *http.Client) *Client {
-	return &Client{base: strings.TrimRight(base, "/"), token: token, http: hc}
+	c := &Client{base: strings.TrimRight(base, "/"), token: token, http: hc}
+	if u, err := url.Parse(c.base); err == nil {
+		c.host = u.Hostname()
+	}
+	return c
 }
 
 type gqlRequest struct {
@@ -131,7 +136,7 @@ func (c *Client) Query(ctx context.Context, query string, vars map[string]any, o
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return transportError(err)
+		return transportError(err, c.host)
 	}
 	defer func() { _ = resp.Body.Close() }()
 	raw, err := io.ReadAll(io.LimitReader(resp.Body, maxBody+1))
@@ -217,15 +222,11 @@ func classify(errs []gqlError, status int) *Error {
 // transportError classifies a failure to get any HTTP answer. A certificate
 // problem gets directions, because a self-hosted instance with an untrusted
 // certificate is the expected case, not an exotic one.
-func transportError(err error) *Error {
-	var unknownCA x509.UnknownAuthorityError
-	var hostErr x509.HostnameError
-	var invalid x509.CertificateInvalidError
-	var verifyErr *tls.CertificateVerificationError
+func transportError(err error, host string) *Error {
+	if e, ok := certificateError(err, host); ok {
+		return e
+	}
 	switch {
-	case errors.As(err, &unknownCA), errors.As(err, &hostErr), errors.As(err, &invalid), errors.As(err, &verifyErr):
-		return &Error{Code: CodeUnreachable, Message: "the instance's TLS certificate was not accepted (" + rootCause(err) +
-			"): set ca_file to its certificate, or — knowing the token can then be read on the path — insecure_skip_verify"}
 	case errors.Is(err, context.DeadlineExceeded), isTimeout(err):
 		return &Error{Code: CodeUnreachable, Message: "no answer before the timeout (" + rootCause(err) + ")"}
 	}
