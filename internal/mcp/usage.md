@@ -172,9 +172,11 @@ first.
   `published` — a report's publication date. An indicator has no
   `published`, and asking for it is `invalid_argument` (OpenCTI would answer
   with no rows).
-- `days`: 1-365 (default 7). `since` in the answer is the exact start; a
-  continuation keeps the first page's `since`, so new arrivals do not shift
-  the pages.
+- `days`: 1-365 (default 7). The window is `since` to `until` (the first
+  page's time), and a continuation keeps it: on `created_at` the pages of one
+  listing hold the same objects, later arrivals excluded. On `created` and
+  `published` an object ingested after the first page can still carry a date
+  inside the window and appear on a later page.
 - `limit`, `cursor`: paging, as in get_related.
 
 Rows carry `name`, `markings`, `created_by`, the three dates where present,
@@ -197,9 +199,13 @@ Save one attachment into the caller's work directory.
   `details.reason`).
 
 The file is written directly under `work_dir` as
-`opencti-lookup-<first 8 characters of the id>-<name reduced to safe
-characters>`: the attachment's own name is third-party text and none of its
-path survives. A file of that name is replaced. The answer gives `work_dir`
+`opencti-lookup-<first 8 characters of the object's internal id>-<8 hex
+characters of a hash of the id and the attachment's name>-<the name reduced to
+safe characters>`: the attachment's own name is third-party text and none of
+its path survives, and the hash keeps two attachments whose names reduce alike
+apart. The internal id is used whichever form of the id was passed, so the
+same attachment always gets the same name and a repeated download replaces
+it. The answer gives `work_dir`
 (resolved), `path` (relative to it), `abs_path`, `bytes`, `sha256`,
 `mime_type`, `of` and `name`. At most 100 MB is saved (`file_too_large`); a
 failed download leaves nothing behind.

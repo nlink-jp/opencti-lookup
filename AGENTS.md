@@ -82,12 +82,19 @@ rewritten on nlink-jp/toml instead of the siblings' hand-written TOML subset.
 - **Partial success is failure.** Any `errors` entry fails the call;
   `extensions.cause` is never passed on.
 - **The response budget lives at the MCP boundary.** Descriptions and patterns
-  are carried whole; other strings over 1000 characters are cut and named;
-  over 128 KB a lookup or search loses tail items (named), a paged list is
-  refused (`response_too_large`).
+  are exempt from the 1000-character cut; other strings over it are cut and
+  named. Over 128 KB a result is cut where the cut is clean and says so: a
+  lookup loses its last values (for one value, its last items), a search its
+  last rows, an object the largest of description / pattern / external
+  references first. A paged list is refused (`response_too_large`) because
+  dropping rows would make its cursor skip them. Cursors carry a fingerprint
+  of their query (and list_recent's closing time), so they continue only the
+  list they came from.
 - **Attachments are named by the listing, saved by the tool.** The storage id
   is taken from the object's `importFiles`, never built from the caller's
-  string; the saved name is rebuilt (`opencti-lookup-<id>-<safe name>`); the
+  string; the saved name is rebuilt as `opencti-lookup-<8 of the resolved
+  internal id>-<8 hex of a hash of id and name>-<safe stem><ext>`, so two
+  attachments never share a name; the
   work directory is judged by pathguard with this tool's config directories
   protected, and the write is confined with `os.Root` and renamed into place.
 - **TLS verification can be turned off** — an accepted risk the operator chose

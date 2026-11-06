@@ -93,8 +93,9 @@ print a `--cursor` line to continue.
 `recent --by` chooses the date: `created_at` (default) is when this instance
 ingested the object, `created` when its source made it, `published` a
 report's publication date. `file` saves under `--out` (default the current
-directory) as `opencti-lookup-<id>-<safe name>` — the attachment's own name is
-third-party text and none of its path is kept — and refuses system locations,
+directory) as `opencti-lookup-<id>-<hash>-<safe name>` — the attachment's own
+name is third-party text and none of its path is kept, and the hash keeps two
+attachments apart — and refuses system locations,
 credential directories and this tool's own config directory.
 
 ### Exit codes
@@ -142,9 +143,12 @@ Tools: `lookup_ioc`, `search_threats`, `get_entity`, `get_related`,
 argument, or the request's `_meta` key `jp.nlink/work_dir` (organization
 ADR-021) — and returns the path. Call `get_usage` first: it is the
 full reference and the error-recovery table. Results are returned whole up to
-128 KB, with long lists capped by `limit` and totals always reported; spilling
-a large result to a file is the client's job (gem-agent, lagent and Claude
-Code all do it).
+128 KB, with long lists capped by `limit` and totals always reported; past
+that a result is cut where the cut is clean (its last values, rows or
+references, or its longest text) and `notes` say what was cut — a paged list
+asks for a smaller `limit` instead. Spilling a large result to a file is the
+client's job (gem-agent, lagent and Claude Code all do it), and the CLI's
+`--json` always returns the whole answer.
 
 ## Development
 

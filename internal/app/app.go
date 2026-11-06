@@ -113,7 +113,7 @@ Flags (before or after the arguments):
   recent:   --type report|indicator  --by created_at|created|published
             --days N (1-365, default 7)  --limit N  --cursor C
   file:     --out DIR (default the current directory; the saved name is
-            rebuilt as opencti-lookup-<id>-<safe name>)
+            rebuilt as opencti-lookup-<id>-<hash>-<safe name>)
 
 An empty answer means nothing within what this key can see: OpenCTI answers
 "not registered" and "not visible to this key" identically. "status" shows
