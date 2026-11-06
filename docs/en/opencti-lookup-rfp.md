@@ -225,7 +225,11 @@ implementing is recorded in AGENTS.md (Gotchas). What follows is the plan as wri
   Meta-tests pin `usage.md` to the code
 - Live tests (`make e2e`, `e2e` build tag) against the development containers
 
-### Phase 2: Additional features
+### Phase 2: Additional features — implemented 2026-11-06
+
+`get_entity` lists attachments (`files`), and `get_report_file` accepts only
+a name from that listing (the storage id is taken from the listing, never
+built from the caller's string). What follows is the plan as written.
 
 - `list_recent`
 - `get_report_file` (ADR-021 `work_dir` contract, pathguard)

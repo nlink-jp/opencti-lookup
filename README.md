@@ -18,8 +18,8 @@ no packet reaches the target under investigation. It never writes.
 
 ## Status
 
-Phase 1 of the [RFP](docs/en/opencti-lookup-rfp.md) is implemented and tested
-against OpenCTI 6.7.4. Not yet released.
+Phases 1 and 2 of the [RFP](docs/en/opencti-lookup-rfp.md) are implemented and
+tested against OpenCTI 6.7.4. Not yet released.
 
 ## Requirements
 
@@ -73,11 +73,21 @@ opencti-lookup search T1566 --type attack-pattern
 opencti-lookup entity <id>
 opencti-lookup related <id> --relationship uses --target-type Attack-Pattern
 opencti-lookup reports <id>
+opencti-lookup recent --days 7                             # reports newly ingested here
+opencti-lookup recent --type indicator --by created --days 30
+opencti-lookup file <id> fixture-report.pdf --out ~/cases/42   # save an attachment (name as entity lists it)
 opencti-lookup status
 ```
 
 `--json` prints JSON; flags may come before or after the arguments. Lists
 print a `--cursor` line to continue.
+
+`recent --by` chooses the date: `created_at` (default) is when this instance
+ingested the object, `created` when its source made it, `published` a
+report's publication date. `file` saves under `--out` (default the current
+directory) as `opencti-lookup-<id>-<safe name>` — the attachment's own name is
+third-party text and none of its path is kept — and refuses system locations,
+credential directories and this tool's own config directory.
 
 ### Exit codes
 
@@ -119,7 +129,10 @@ Add `"--config", "/path/to/config.toml"` to `args` to give one client its own
 configuration (for example a key with a narrower view).
 
 Tools: `lookup_ioc`, `search_threats`, `get_entity`, `get_related`,
-`get_reports`, `server_status`, `get_usage`. Call `get_usage` first: it is the
+`get_reports`, `list_recent`, `get_report_file`, `server_status`, `get_usage`.
+`get_report_file` writes into the caller's work directory — its `work_dir`
+argument, or the request's `_meta` key `jp.nlink/work_dir` (organization
+ADR-021) — and returns the path. Call `get_usage` first: it is the
 full reference and the error-recovery table. Results are returned whole up to
 128 KB, with long lists capped by `limit` and totals always reported; spilling
 a large result to a file is the client's job (gem-agent, lagent and Claude

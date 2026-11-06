@@ -27,7 +27,8 @@ make check   # lint + test + build-all
 make e2e     # live tests against the dev stack (make dev-up and seed first)
 ```
 
-Go 1.25+. One dependency: `github.com/nlink-jp/toml` (organization ADR-026).
+Go 1.25+. Two dependencies, both organization libraries: `github.com/nlink-jp/toml`
+(ADR-026) and `github.com/nlink-jp/pathguard` (ADR-021/022).
 
 The dev stack: `make dev-up` / `dev-down` / `dev-reset` (deletes data);
 seed with `dev/seed/push.sh`, `python3 -I dev/seed/readonly_user.py`,
@@ -43,7 +44,8 @@ source_test.go            No raw control or bidi character in any source file
 internal/config/          Strict TOML config (nlink-jp/toml), env, search order, warnings
 internal/opencti/         GraphQL client: one POST per query, error classification
 internal/ioc/             Value classification, stored forms, STIX pattern literals
-internal/engine/          Shared core: lookup, search, entity, related, reports, status
+internal/engine/          Shared core: lookup, search, entity, related, reports, recent, files, status
+internal/save/            Writes a download into the work directory through os.Root
 internal/app/             CLI shell: dispatch, flags, text and JSON rendering
 internal/mcp/             stdio JSON-RPC MCP server, response budget, embedded usage.md
 internal/termsafe/        The one list of characters a terminal obeys
@@ -83,6 +85,11 @@ rewritten on nlink-jp/toml instead of the siblings' hand-written TOML subset.
   are carried whole; other strings over 1000 characters are cut and named;
   over 128 KB a lookup or search loses tail items (named), a paged list is
   refused (`response_too_large`).
+- **Attachments are named by the listing, saved by the tool.** The storage id
+  is taken from the object's `importFiles`, never built from the caller's
+  string; the saved name is rebuilt (`opencti-lookup-<id>-<safe name>`); the
+  work directory is judged by pathguard with this tool's config directories
+  protected, and the write is confined with `os.Root` and renamed into place.
 - **TLS verification can be turned off** — an accepted risk the operator chose
   for a self-hosted instance, documented in the RFP; on by default, warned
   every start, reported by `server_status`. Plain http likewise.

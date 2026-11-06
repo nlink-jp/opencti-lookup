@@ -17,7 +17,7 @@ observable と indicator、その目撃情報（誤検知としての目撃か�
 
 ## 状態
 
-[RFP](docs/ja/opencti-lookup-rfp.ja.md) の Phase 1 を実装し、OpenCTI 6.7.4 で
+[RFP](docs/ja/opencti-lookup-rfp.ja.md) の Phase 1 と Phase 2 を実装し、OpenCTI 6.7.4 で
 試験済みです。まだリリースしていません。
 
 ## 必要なもの
@@ -69,11 +69,20 @@ opencti-lookup search T1566 --type attack-pattern
 opencti-lookup entity <id>
 opencti-lookup related <id> --relationship uses --target-type Attack-Pattern
 opencti-lookup reports <id>
+opencti-lookup recent --days 7                             # このインスタンスに新しく入ったレポート
+opencti-lookup recent --type indicator --by created --days 30
+opencti-lookup file <id> fixture-report.pdf --out ~/cases/42   # 添付ファイルの保存（名前は entity の一覧どおり）
 opencti-lookup status
 ```
 
 `--json` で JSON を出します。フラグは引数の前後どちらに置いても構いません。一覧は
 続きを取るための `--cursor` の行を表示します。
+
+`recent --by` で日付の軸を選びます。`created_at`（既定）はこのインスタンスに取り込まれた
+日時、`created` は出典が作った日時、`published` はレポートの公開日です。`file` は
+`--out`（既定はカレントディレクトリ）に `opencti-lookup-<id>-<安全な名前>` として保存します。
+添付ファイル自身の名前は第三者の文字列なので、パスは一切残しません。システムの場所、資格情報の
+ディレクトリ、このツールの設定ディレクトリへの保存は拒否します。
 
 ### 終了コード
 
@@ -112,7 +121,9 @@ opencti-lookup status
 （たとえば見える範囲の狭いキー）を渡せます。
 
 ツール: `lookup_ioc`、`search_threats`、`get_entity`、`get_related`、`get_reports`、
-`server_status`、`get_usage`。最初に `get_usage` を呼んでください。全体の説明と
+`list_recent`、`get_report_file`、`server_status`、`get_usage`。`get_report_file` は
+呼び出し側の作業ディレクトリ（`work_dir` 引数、無ければ要求の `_meta` の
+`jp.nlink/work_dir`。組織 ADR-021）に書き、そのパスを返します。最初に `get_usage` を呼んでください。全体の説明と
 エラーへの対処表を返します。結果は 128 KB まで丸ごと返し、長い一覧は `limit` で抑え、
 総数は常に示します。大きな結果をファイルに退避するのはクライアントの役目です
 （gem-agent・lagent・Claude Code はいずれも行います）。

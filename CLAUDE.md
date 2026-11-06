@@ -40,6 +40,9 @@ make e2e     # live, against the dev stack (make dev-up, then seed — see READM
   requires every `Tool*` and `Code*` constant, every argument and enum value in
   `usage.md`. README.md and README.ja.md change together.
 - **No raw control or bidi character in any source file** (`source_test.go`).
+- **Writes go through pathguard and os.Root**: `get_report_file` / `file` never
+  write outside the judged work directory, and never under a name taken from
+  upstream.
 - **Fixtures are fictional**: RFC 5737 / RFC 2606 values only (`dev/seed/`).
 
 ## Communication Language

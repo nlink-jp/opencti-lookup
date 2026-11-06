@@ -27,6 +27,12 @@ adheres to [Semantic Versioning](https://semver.org/).
 - Strict configuration (nlink-jp/toml): `--config`, search order including
   `~/Library/Application Support`, `ca_file`, `insecure_skip_verify`, plain
   http accepted with a warning, a warning for a config file that is not 0600.
-- A local MCP server (`opencti-lookup mcp`) with the six tools and `get_usage`.
+- `recent` / `list_recent`: reports or indicators by ingestion, source or
+  publication date within 1-365 days, refusing a date a type lacks.
+- `file` / `get_report_file`: save one attachment into a work directory
+  (`work_dir` argument or `_meta` `jp.nlink/work_dir`, judged by
+  nlink-jp/pathguard, organization ADR-021/022), under a rebuilt name, through
+  `os.Root`; `get_entity` lists an object's attachments.
+- A local MCP server (`opencti-lookup mcp`) with the eight tools and `get_usage`.
 - A development OpenCTI 6.7.4 stack on Podman (`make dev-up`) with fictional
   fixtures, and live tests against it (`make e2e`).
