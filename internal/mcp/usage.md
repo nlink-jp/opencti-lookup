@@ -100,6 +100,9 @@ type: an indicator's `pattern`, `valid_from`, `valid_until`, `score`,
 `decay_base_score`; a report's `published` and `report_types`; a technique's
 `mitre_id`, `platforms` and `kill_chain_phases`; malware's `is_family` and
 `malware_types`. `external_references` is `{total, items}` (up to 100).
+`files` lists the object's attachments (`name`, `size`, `mime_type`,
+`last_modified`) — a report's full PDF often lives here while its
+`description` is a short summary; `get_report_file` saves one.
 
 ### get_related
 
@@ -152,6 +155,47 @@ The reports, notes and groupings that contain one object, newest first.
 Containers marked beyond what the key can see are absent, and absent from
 `total` too.
 
+### list_recent
+
+The reports or indicators whose chosen date falls in the last N days, newest
+first.
+
+- `type`: `report` (default) or `indicator`.
+- `date_field`: `created_at` (default) — when this instance ingested the
+  object, i.e. what is new here; `created` — when its source made it;
+  `published` — a report's publication date. An indicator has no
+  `published`, and asking for it is `invalid_argument` (OpenCTI would answer
+  with no rows).
+- `days`: 1-365 (default 7). `since` in the answer is the exact start.
+- `limit`, `cursor`: paging, as in get_related.
+
+Rows carry `name`, `markings`, `created_by`, the three dates where present,
+and for a report `report_types`, for an indicator `pattern`, `score` and
+`revoked`.
+
+### get_report_file
+
+Save one attachment into the caller's work directory.
+
+- `id` (required): the object's `id` or `standard_id` (usually a report).
+- `name` (required): the attachment's name exactly as `get_entity` lists it
+  in `files`. Any other name is `not_found`, and the message lists the names
+  the object has.
+- `work_dir` (required): the absolute path of an existing directory you can
+  read back — your session or working directory. When it is absent, the
+  request's `_meta` key `jp.nlink/work_dir` is used, if a runtime set it.
+  System locations, credential directories and this server's own
+  configuration directory are refused (`work_dir_denied`, with
+  `details.reason`).
+
+The file is written directly under `work_dir` as
+`opencti-lookup-<first 8 characters of the id>-<name reduced to safe
+characters>`: the attachment's own name is third-party text and none of its
+path survives. A file of that name is replaced. The answer gives `work_dir`
+(resolved), `path` (relative to it), `abs_path`, `bytes`, `sha256`,
+`mime_type`, `of` and `name`. At most 100 MB is saved (`file_too_large`); a
+failed download leaves nothing behind.
+
 ### server_status
 
 No arguments. Returns `version` and `verified_version` with
@@ -183,5 +227,11 @@ with `isError: true`.
 | `upstream_error` | The instance failed while answering. | Retry later, or ask for less. |
 | `unreachable` | No answer: network, DNS, TLS certificate or timeout. | For a certificate, the operator sets `ca_file` (or, knowingly, `insecure_skip_verify`); otherwise retry later. |
 | `response_too_large` | A paged result exceeded 128 KB. | Ask again with a smaller `limit`. |
+| `file_too_large` | The attachment is over 100 MB. | Read it in the OpenCTI interface instead. |
+| `work_dir_required` | get_report_file had no `work_dir` and no `_meta` key. | Pass `work_dir`: a directory you can read back. |
+| `work_dir_invalid` | `work_dir` is not an absolute path. | Pass an absolute path. |
+| `work_dir_not_found` | `work_dir` does not exist or is not a directory. | Create it, or pass one that exists. |
+| `work_dir_not_writable` | `work_dir` cannot take a new file. | Pass a directory you can write. |
+| `work_dir_denied` | `work_dir` is a system location, a credential or agent-control directory, or this server's configuration directory; `details.reason` says which. | Pass your session or working directory instead. |
 | `unknown_tool` | No tool by that name. | Call `get_usage` for the list. |
 | `internal_error` | An error nothing classified. | Report it; the message says what failed. |

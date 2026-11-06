@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/nlink-jp/opencti-lookup/internal/engine"
+	"github.com/nlink-jp/pathguard/workdir"
 )
 
 // protocolVersion is the MCP revision this server speaks.
@@ -21,6 +22,9 @@ const serverName = "opencti-lookup"
 type Server struct {
 	Eng     Engine
 	Version string
+	// WorkDirs resolves and judges the directory get_report_file writes into
+	// (organization ADR-021 / ADR-022). The zero value refuses every call.
+	WorkDirs workdir.Resolver
 }
 
 // Serve reads newline-delimited JSON-RPC messages until stdin closes, which is
@@ -123,8 +127,18 @@ func (s *Server) handle(ctx context.Context, req *request) (response, bool) {
 }
 
 type callParams struct {
-	Name      string          `json:"name"`
-	Arguments json.RawMessage `json:"arguments"`
+	Name      string                     `json:"name"`
+	Arguments json.RawMessage            `json:"arguments"`
+	Meta      map[string]json.RawMessage `json:"_meta"`
+}
+
+type metaKey struct{}
+
+// requestMeta is the tools/call request's _meta, where a runtime that knows
+// the session's work directory names it (jp.nlink/work_dir, ADR-021 §2).
+func requestMeta(ctx context.Context) map[string]json.RawMessage {
+	m, _ := ctx.Value(metaKey{}).(map[string]json.RawMessage)
+	return m
 }
 
 func (s *Server) callTool(ctx context.Context, req *request) response {
@@ -134,7 +148,7 @@ func (s *Server) callTool(ctx context.Context, req *request) response {
 			return errorResponse(req.ID, -32602, "invalid params: "+err.Error())
 		}
 	}
-	result, err := s.dispatch(ctx, p.Name, p.Arguments)
+	result, err := s.dispatch(context.WithValue(ctx, metaKey{}, p.Meta), p.Name, p.Arguments)
 	if err != nil {
 		// Tool failures are results, not protocol errors: the model has to see
 		// them and decide what to do, and a JSON-RPC error would be swallowed

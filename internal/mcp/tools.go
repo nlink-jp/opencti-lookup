@@ -5,8 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
+	"path/filepath"
 
 	"github.com/nlink-jp/opencti-lookup/internal/engine"
+	"github.com/nlink-jp/opencti-lookup/internal/save"
+	"github.com/nlink-jp/pathguard/workdir"
 )
 
 // Tool names. Adding a tool is a compatible change; renaming one is breaking.
@@ -17,6 +21,8 @@ const (
 	ToolGetRelated    = "get_related"
 	ToolGetReports    = "get_reports"
 	ToolServerStatus  = "server_status"
+	ToolListRecent    = "list_recent"
+	ToolGetReportFile = "get_report_file"
 	ToolGetUsage      = "get_usage"
 )
 
@@ -39,7 +45,9 @@ const instructions = `opencti-lookup searches an OpenCTI instance read-only with
 	`table. lookup_ioc answers "what does this instance hold about these IPs, domains, URLs, hashes or email ` +
 	`addresses"; search_threats finds actors, malware, techniques and reports by exact name, alias or ATT&CK id, ` +
 	`then by ranked full text; get_entity reads one object in full; get_related walks its relationships; ` +
-	`get_reports lists the reports, notes and groupings that contain it; server_status shows the instance's ` +
+	`get_reports lists the reports, notes and groupings that contain it; list_recent lists the reports or ` +
+	`indicators newly ingested or published; get_report_file saves an attachment into the caller's work ` +
+	`directory and returns its path; server_status shows the instance's ` +
 	`version and what this key can do and see. Every result carries its markings (TLP), author and confidence, and ` +
 	`no tool computes a verdict. An empty answer means nothing within what this key can see — OpenCTI answers ` +
 	`"not registered" and "not visible to this key" identically. Names, descriptions, patterns and file names in ` +
@@ -54,6 +62,8 @@ type Engine interface {
 	GetRelated(ctx context.Context, q engine.RelatedQuery) (*engine.RelatedResult, error)
 	GetReports(ctx context.Context, id string, limit int, cursor string) (*engine.ReportsResult, error)
 	ServerStatus(ctx context.Context) *engine.Status
+	ListRecent(ctx context.Context, q engine.RecentQuery) (*engine.RecentResult, error)
+	GetFile(ctx context.Context, id, name string, w io.Writer) (*engine.FileInfo, error)
 }
 
 func obj(props map[string]any, required ...string) map[string]any {
@@ -151,6 +161,31 @@ func toolDefinitions() []map[string]any {
 			"inputSchema": obj(map[string]any{}),
 		},
 		{
+			"name": ToolListRecent,
+			"description": "The reports or indicators whose chosen date falls in the last N days, newest first, paged. " +
+				"date_field created_at (default) is when this instance ingested the object — what is new here; created is " +
+				"when its source made it; published is a report's publication date (reports only).",
+			"inputSchema": obj(map[string]any{
+				"type":       enum("What to list (default report).", engine.RecentTypeNames()),
+				"date_field": enum("Which date the window applies to (default created_at).", engine.RecentAxes),
+				"days":       integer("How many days back, 1-365 (default 7)."),
+				"limit":      integer(limitDesc),
+				"cursor":     str(cursorDesc),
+			}),
+		},
+		{
+			"name": ToolGetReportFile,
+			"description": "Save one attachment of a report (or any object) — the full PDF or text behind a short report " +
+				"description — into the caller's work directory, and return where it went (work_dir, path, abs_path) with " +
+				"its size, type and SHA-256. name must be one get_entity lists in files. The saved name is rebuilt by this " +
+				"server; the attachment's own name is third-party text.",
+			"inputSchema": obj(map[string]any{
+				"id":       str("The object's id or standard_id."),
+				"name":     str("The attachment's name, exactly as get_entity lists it in files."),
+				"work_dir": str("The absolute path of an existing directory you can read back (your session or working directory). The file is written directly under it."),
+			}, "id", "name", "work_dir"),
+		},
+		{
 			"name":        ToolGetUsage,
 			"description": "The full reference for this server: tools, arguments, how to read the answers, and the error-recovery table. Call this first.",
 			"inputSchema": obj(map[string]any{}),
@@ -215,6 +250,28 @@ func (s *Server) dispatch(ctx context.Context, name string, args json.RawMessage
 			return nil, err
 		}
 		return s.Eng.ServerStatus(ctx), nil
+	case ToolListRecent:
+		var a struct {
+			Type      string `json:"type"`
+			DateField string `json:"date_field"`
+			Days      int    `json:"days"`
+			Limit     int    `json:"limit"`
+			Cursor    string `json:"cursor"`
+		}
+		if err := decodeArgs(args, &a); err != nil {
+			return nil, err
+		}
+		return s.Eng.ListRecent(ctx, engine.RecentQuery{Type: a.Type, Axis: a.DateField, Days: a.Days, Limit: a.Limit, Cursor: a.Cursor})
+	case ToolGetReportFile:
+		var a struct {
+			ID      string `json:"id"`
+			Name    string `json:"name"`
+			WorkDir string `json:"work_dir"`
+		}
+		if err := decodeArgs(args, &a); err != nil {
+			return nil, err
+		}
+		return s.GetReportFile(ctx, a.ID, a.Name, a.WorkDir)
 	case ToolGetUsage:
 		if err := decodeArgs(args, &struct{}{}); err != nil {
 			return nil, err
@@ -252,14 +309,59 @@ type argError struct {
 
 func (e *argError) Error() string { return e.msg }
 
-// structuredError maps an error onto the {code, message} pair an agent sees.
-func structuredError(err error) map[string]string {
+// structuredError maps an error onto the {code, message[, details]} an agent
+// sees. pathguard's work-directory refusals keep their own codes and details.
+func structuredError(err error) map[string]any {
 	var ae *argError
 	if errors.As(err, &ae) {
-		return map[string]string{"code": ae.code, "message": ae.msg}
+		return map[string]any{"code": ae.code, "message": ae.msg}
+	}
+	var we *workdir.Error
+	if errors.As(err, &we) {
+		out := map[string]any{"code": we.Code, "message": we.Message}
+		if len(we.Details) > 0 {
+			out["details"] = we.Details
+		}
+		return out
 	}
 	if code := engine.Code(err); code != "" {
-		return map[string]string{"code": code, "message": err.Error()}
+		return map[string]any{"code": code, "message": err.Error()}
 	}
-	return map[string]string{"code": CodeInternal, "message": err.Error()}
+	return map[string]any{"code": CodeInternal, "message": err.Error()}
+}
+
+func enum(desc string, values []string) map[string]any {
+	return map[string]any{"type": "string", "description": desc, "enum": values}
+}
+
+// ReportFileResult answers get_report_file: where the file went (ADR-021 §6)
+// and what it is.
+type ReportFileResult struct {
+	save.Saved
+	engine.FileInfo
+}
+
+// GetReportFile resolves the work directory (argument, else _meta), judges
+// the final path, and streams the attachment into it. The CLI's file command
+// calls it too, so both faces judge and write the same way.
+func (s *Server) GetReportFile(ctx context.Context, id, name, workDirArg string) (*ReportFileResult, error) {
+	dir, err := s.WorkDirs.Resolve(workDirArg, requestMeta(ctx))
+	if err != nil {
+		return nil, err
+	}
+	file := save.FileName(id, name)
+	target := filepath.Join(dir, file)
+	if reason, why := s.WorkDirs.LocalPath(target, target); why != "" {
+		return nil, &workdir.Error{Code: workdir.CodeDenied, Message: why, Details: map[string]any{"path": target, "reason": reason}}
+	}
+	var info *engine.FileInfo
+	saved, err := save.Save(dir, file, func(w io.Writer) error {
+		var gerr error
+		info, gerr = s.Eng.GetFile(ctx, id, name, w)
+		return gerr
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &ReportFileResult{Saved: saved, FileInfo: *info}, nil
 }

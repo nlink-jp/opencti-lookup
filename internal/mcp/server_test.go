@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strings"
 	"testing"
 
@@ -53,6 +54,18 @@ func (s *stubEngine) GetRelated(_ context.Context, q engine.RelatedQuery) (*engi
 func (s *stubEngine) GetReports(_ context.Context, id string, limit int, cursor string) (*engine.ReportsResult, error) {
 	s.note("reports", fmt.Sprint(id, limit, cursor))
 	return &engine.ReportsResult{Containers: []engine.ContainerRow{}}, s.err
+}
+func (s *stubEngine) ListRecent(_ context.Context, q engine.RecentQuery) (*engine.RecentResult, error) {
+	s.note("recent", q)
+	return &engine.RecentResult{Type: q.Type, Rows: []engine.RecentRow{}}, s.err
+}
+func (s *stubEngine) GetFile(_ context.Context, id, name string, w io.Writer) (*engine.FileInfo, error) {
+	s.note("file", id+"/"+name)
+	if s.err != nil {
+		return nil, s.err
+	}
+	n, _ := io.WriteString(w, "attachment body")
+	return &engine.FileInfo{Name: name, Bytes: int64(n), SHA256: "sha"}, nil
 }
 func (s *stubEngine) ServerStatus(context.Context) *engine.Status {
 	s.note("status", true)
@@ -112,7 +125,7 @@ func TestProtocol(t *testing.T) {
 		t.Fatalf("initialize %v", info)
 	}
 	tools := r[1]["result"].(map[string]any)["tools"].([]any)
-	if len(tools) != 7 {
+	if len(tools) != 9 {
 		t.Fatalf("%d tools", len(tools))
 	}
 	for _, tl := range tools {
