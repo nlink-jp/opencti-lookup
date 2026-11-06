@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/nlink-jp/opencti-lookup/internal/config"
@@ -40,6 +41,7 @@ const (
 // Querier is the part of the OpenCTI client the engine uses.
 type Querier interface {
 	Query(ctx context.Context, query string, vars map[string]any, out any) error
+	Download(ctx context.Context, fileID string, w io.Writer, max int64) (int64, string, error)
 }
 
 // Engine answers questions against one instance.

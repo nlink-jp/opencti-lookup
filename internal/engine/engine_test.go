@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"strings"
 	"testing"
 
@@ -35,6 +36,15 @@ func (f *fake) Query(_ context.Context, q string, vars map[string]any, out any) 
 		return errors.New("fake: no reply for " + op)
 	}
 	return json.Unmarshal([]byte(data), out)
+}
+
+func (f *fake) Download(_ context.Context, fileID string, w io.Writer, max int64) (int64, string, error) {
+	f.calls = append(f.calls, call{"Download", map[string]any{"id": fileID}})
+	if err := f.errs["Download"]; err != nil {
+		return 0, "", err
+	}
+	n, err := io.WriteString(w, f.replies["Download"])
+	return int64(n), "text/plain", err
 }
 
 func (f *fake) varsOf(op string) map[string]any {
@@ -289,6 +299,10 @@ type sequence struct {
 	f     *fake
 	after map[int]string
 	n     *int
+}
+
+func (s *sequence) Download(ctx context.Context, id string, w io.Writer, max int64) (int64, string, error) {
+	return s.f.Download(ctx, id, w, max)
 }
 
 func (s *sequence) Query(ctx context.Context, q string, vars map[string]any, out any) error {

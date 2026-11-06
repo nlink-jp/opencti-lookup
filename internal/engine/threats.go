@@ -209,6 +209,7 @@ type Entity struct {
 	DecayBase       *int         `json:"decay_base_score,omitempty"`
 	ObservableValue string       `json:"observable_value,omitempty"`
 	ExternalRefs    ExternalRefs `json:"external_references"`
+	Files           []FileRef    `json:"files"` // attachments; get_report_file saves one
 }
 
 // ExternalRefs lists external references with their total.
@@ -230,6 +231,7 @@ const entityQuery = `query Entity($id: String!) {
     ` + refFields + ` standard_id created_at
     objectMarking { definition } objectLabel { value } createdBy { name }
     externalReferences(first: 100) { pageInfo { globalCount } edges { node { source_name url external_id description } } }
+    importFiles(first: 100) { edges { node { id name size lastModified metaData { mimetype } } } }
     ... on StixDomainObject { confidence revoked created modified }
     ... on StixCyberObservable { observable_value x_opencti_score x_opencti_description }
     ... on IntrusionSet { name aliases description first_seen last_seen }
@@ -258,6 +260,7 @@ type wireEntity struct {
 	ObjectMarking []marking `json:"objectMarking"`
 	ObjectLabel   []label   `json:"objectLabel"`
 	CreatedBy     *named    `json:"createdBy"`
+	ImportFiles   wireFiles `json:"importFiles"`
 	ExternalRefs  struct {
 		PageInfo pageInfo `json:"pageInfo"`
 		Edges    []struct {
@@ -324,6 +327,7 @@ func (e *Engine) GetEntity(ctx context.Context, id string) (*Entity, error) {
 		ValidUntil: w.ValidUntil, Score: w.Score, DecayBase: w.DecayBase, ObservableValue: w.ObservableValue,
 		Description:  w.Description,
 		ExternalRefs: ExternalRefs{Total: w.ExternalRefs.PageInfo.GlobalCount, Items: []ExternalRef{}},
+		Files:        w.ImportFiles.refs(),
 	}
 	ent.Markings = markings(w.ObjectMarking)
 	switch {
