@@ -20,6 +20,7 @@ type stubEngine struct {
 	err    error
 	lookup *engine.LookupResult
 	rel    *engine.RelatedResult
+	entity *engine.Entity
 }
 
 func (s *stubEngine) note(k string, v any) {
@@ -42,6 +43,9 @@ func (s *stubEngine) SearchThreats(_ context.Context, q string, types []string, 
 }
 func (s *stubEngine) GetEntity(_ context.Context, id string) (*engine.Entity, error) {
 	s.note("entity", id)
+	if s.entity != nil {
+		return s.entity, s.err
+	}
 	return &engine.Entity{Description: strings.Repeat("d", 5000)}, s.err
 }
 func (s *stubEngine) GetRelated(_ context.Context, q engine.RelatedQuery) (*engine.RelatedResult, error) {
@@ -271,5 +275,47 @@ func TestUpsertDropped(t *testing.T) {
 	n = upsertDropped(n, "values: ", "b")
 	if strings.Join(n, "|") != "rows omitted: 2|values: a, b" {
 		t.Fatalf("%q", n)
+	}
+}
+
+// One object larger than the ceiling is still answered: its longest text is
+// cut and the cut is named, with where to read it whole.
+func TestOversizedEntityIsShortened(t *testing.T) {
+	big := &engine.Entity{Name: "R", Description: strings.Repeat("報", 70_000)} // ~210 KB
+	r := exchange(t, &stubEngine{entity: big}, callFrame(1, ToolGetEntity, `{"id":"x"}`))
+	text, isErr := toolResult(t, r[0])
+	if isErr || len(text) > maxResultBytes {
+		t.Fatalf("isErr=%v len=%d: %.200s", isErr, len(text), text)
+	}
+	var got engine.Entity
+	if err := json.Unmarshal([]byte(text), &got); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasSuffix(got.Description, "…") || !strings.HasPrefix(got.Description, "報") {
+		t.Fatal("the description was not cut on a rune boundary")
+	}
+	if len(got.Notes) != 1 || !strings.Contains(got.Notes[0], "description shortened") || !strings.Contains(got.Notes[0], "entity --json") {
+		t.Fatalf("notes %v", got.Notes)
+	}
+}
+
+func TestOversizedSingleLookupLosesTailItems(t *testing.T) {
+	one := engine.IOCResult{Input: "192.0.2.10", Found: true}
+	for i := 0; i < 60; i++ {
+		one.Indicators = append(one.Indicators, engine.Indicator{Name: fmt.Sprint(i), Pattern: strings.Repeat("p", 4000)})
+	}
+	r := exchange(t, &stubEngine{lookup: &engine.LookupResult{Results: []engine.IOCResult{one}}}, callFrame(1, ToolLookupIOC, `{"values":["192.0.2.10"]}`))
+	text, isErr := toolResult(t, r[0])
+	if isErr || len(text) > maxResultBytes {
+		t.Fatalf("isErr=%v len=%d", isErr, len(text))
+	}
+	var got engine.LookupResult
+	_ = json.Unmarshal([]byte(text), &got)
+	n := len(got.Results[0].Indicators)
+	if n == 0 || n == 60 || got.Results[0].Indicators[0].Name != "0" {
+		t.Fatalf("%d indicators kept", n)
+	}
+	if note := strings.Join(got.Notes, " "); !strings.Contains(note, fmt.Sprintf("indicators omitted for size from 192.0.2.10 (the CLI's ioc --json lists them all): %d", 60-n)) {
+		t.Fatalf("notes %q", note)
 	}
 }

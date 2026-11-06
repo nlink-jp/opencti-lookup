@@ -7,8 +7,8 @@
 // the boundary (budget.go, server.go): any string over 1000 characters that is
 // not carried whole by design (a description, a pattern) is shortened and
 // named, and no result leaves over 128 KB — a lookup or a search loses items
-// from its tail, named in notes; a paged list is refused, because dropping
-// rows would make its cursor skip them. Nothing is spilled to a file: the
+// from its tail and an object its longest text, named in notes; a paged list
+// is refused, because dropping rows would make its cursor skip them. Nothing is spilled to a file: the
 // calling runtime does that (organization ADR-021 §3).
 //
 // get_usage is canonical: the embedded manual is what an agent reads before

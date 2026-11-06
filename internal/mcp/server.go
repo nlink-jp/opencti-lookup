@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/nlink-jp/opencti-lookup/internal/engine"
 	"github.com/nlink-jp/pathguard/workdir"
@@ -175,20 +176,20 @@ type rawText string
 const maxResultBytes = 128 << 10
 
 // toolText wraps a payload as MCP text content. A result over the ceiling is
-// cut at the tail where the cut is clean — the last values of a lookup, the
-// last rows of a search, both named — and refused where it is not: a paged
-// list cannot lose rows without its cursor skipping them, so it asks for a
-// smaller limit instead.
+// cut where the cut is clean, and says what it lost: a lookup loses its last
+// values, then (for one value) its last items; a search its last rows; an
+// object its longest text, then its last external references. A paged list is
+// refused instead — dropping rows would make its cursor skip them.
 func toolText(v any) map[string]any {
 	b, err := json.MarshalIndent(v, "", "  ")
 	if err != nil {
 		return toolError(fmt.Errorf("encode result: %w", err))
 	}
 	if len(b) > maxResultBytes {
-		trimmed, ok := trimTail(v)
+		trimmed, ok := trimTail(v, len(b)-maxResultBytes)
 		if !ok {
 			return toolError(&argError{code: CodeTooLarge, msg: fmt.Sprintf(
-				"the result is %d bytes, over this server's ceiling of %d; ask for less — a smaller limit", len(b), maxResultBytes)})
+				"the result is %d bytes, over this server's ceiling of %d; ask for less (a smaller limit, fewer values), or read it whole with the CLI's --json", len(b), maxResultBytes)})
 		}
 		return toolText(trimmed)
 	}
@@ -197,18 +198,39 @@ func toolText(v any) map[string]any {
 	}
 }
 
-// trimTail drops the last item of a result whose items are independent, and
-// says so in its notes. It reports false when nothing can be dropped cleanly.
-func trimTail(v any) (any, bool) {
+// trimTail makes a result smaller by one clean step and says so in its notes;
+// over is how many bytes too large it is. It reports false when nothing can
+// be dropped cleanly.
+func trimTail(v any, over int) (any, bool) {
 	switch r := v.(type) {
 	case *engine.LookupResult:
-		if len(r.Results) <= 1 {
-			return v, false
+		if len(r.Results) > 1 {
+			dropped := r.Results[len(r.Results)-1]
+			r.Results = r.Results[:len(r.Results)-1]
+			r.Notes = upsertDropped(r.Notes, "values omitted for size (look them up again on their own): ", dropped.Input)
+			return r, true
 		}
-		dropped := r.Results[len(r.Results)-1]
-		r.Results = r.Results[:len(r.Results)-1]
-		r.Notes = upsertDropped(r.Notes, "values omitted for size (look them up again on their own): ", dropped.Input)
-		return r, true
+		if len(r.Results) == 1 {
+			one := &r.Results[0]
+			prefix := "omitted for size from " + one.Input + " (the CLI's ioc --json lists them all): "
+			switch {
+			case len(one.Indicators) > 0:
+				one.Indicators = one.Indicators[:len(one.Indicators)-1]
+				r.Notes = upsertDropped(r.Notes, "indicators "+prefix, "1")
+			case len(one.PatternMentions) > 0:
+				one.PatternMentions = one.PatternMentions[:len(one.PatternMentions)-1]
+				r.Notes = upsertDropped(r.Notes, "pattern mentions "+prefix, "1")
+			case len(one.Sightings) > 0:
+				one.Sightings = one.Sightings[:len(one.Sightings)-1]
+				r.Notes = upsertDropped(r.Notes, "sightings "+prefix, "1")
+			case len(one.Observables) > 1:
+				one.Observables = one.Observables[:len(one.Observables)-1]
+				r.Notes = upsertDropped(r.Notes, "observables "+prefix, "1")
+			default:
+				return v, false
+			}
+			return r, true
+		}
 	case *engine.SearchResult:
 		if len(r.Rows) <= 1 {
 			return v, false
@@ -217,8 +239,41 @@ func trimTail(v any) (any, bool) {
 		r.MoreRanked = r.MoreRanked || r.Mode == "fulltext"
 		r.Notes = upsertDropped(r.Notes, "rows omitted for size from the end of this list: ", "1")
 		return r, true
+	case *engine.Entity:
+		const whole = " (the CLI's entity --json returns it whole)"
+		switch {
+		case len(r.Description) > len(r.Pattern) && len(r.Description) > 1024:
+			r.Description, r.Notes = shorten(r.Description, over, "description", whole, r.Notes)
+		case len(r.Pattern) > 1024:
+			r.Pattern, r.Notes = shorten(r.Pattern, over, "pattern", whole, r.Notes)
+		case len(r.ExternalRefs.Items) > 0:
+			r.ExternalRefs.Items = r.ExternalRefs.Items[:len(r.ExternalRefs.Items)-1]
+			r.Notes = upsertDropped(r.Notes, "external references omitted for size"+whole+": ", "1")
+		default:
+			return v, false
+		}
+		return r, true
 	}
 	return v, false
+}
+
+// shorten cuts s by at least over bytes (plus room for the note), on a rune
+// boundary, and records the cut once with the original length.
+func shorten(s string, over int, field, whole string, notes []string) (string, []string) {
+	keep := len(s) - over - 512
+	if keep < 0 {
+		keep = 0
+	}
+	for keep > 0 && !utf8.RuneStart(s[keep]) {
+		keep--
+	}
+	prefix := field + " shortened to fit this server's 128 KB ceiling" + whole + "; original length "
+	for _, n := range notes {
+		if strings.HasPrefix(n, prefix) {
+			return s[:keep] + "…", notes
+		}
+	}
+	return s[:keep] + "…", append(notes, fmt.Sprintf("%s%d bytes", prefix, len(s)))
 }
 
 // upsertDropped keeps one note per kind of omission and grows it.

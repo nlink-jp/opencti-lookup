@@ -210,6 +210,7 @@ type Entity struct {
 	ObservableValue string       `json:"observable_value,omitempty"`
 	ExternalRefs    ExternalRefs `json:"external_references"`
 	Files           []FileRef    `json:"files"` // attachments; get_report_file saves one
+	Notes           []string     `json:"notes,omitempty"`
 }
 
 // ExternalRefs lists external references with their total.

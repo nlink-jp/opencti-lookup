@@ -26,10 +26,14 @@ call `server_status` to learn it.
 - **Lists carry their true `total`.** When fewer items are listed than exist,
   the rest are reachable with `get_related`, `get_reports` or `next_cursor`.
 - **Long values are shortened only where named.** A `description` and a
-  `pattern` are returned whole. Any other string over 1000 characters is cut,
-  and `notes` names the field. A result over 128 KB loses values (lookup_ioc)
-  or rows (search_threats) from its end, named in `notes`; a paged list is
-  refused with `response_too_large` instead — ask for a smaller `limit`.
+  `pattern` are returned whole up to the 128 KB ceiling of one result. Any
+  other string over 1000 characters is cut, and `notes` names the field. A
+  result over 128 KB is cut cleanly and says so in `notes`: lookup_ioc loses
+  its last values, or for one value its last indicators, mentions, sightings
+  and observables; search_threats its last rows; get_entity its description
+  or pattern (shortened, with the original length) and then its last external
+  references. A paged list is refused with `response_too_large` instead — ask
+  for a smaller `limit`. The CLI's `--json` always returns the whole answer.
 
 ## Tools
 
@@ -230,7 +234,7 @@ with `isError: true`.
 | `query_rejected` | The instance did not accept this tool's query. | Check `server_status`: a version other than `verified_version` is the usual cause. |
 | `upstream_error` | The instance failed while answering. | Retry later, or ask for less. |
 | `unreachable` | No answer: network, DNS, TLS certificate or timeout. | For a certificate, the operator sets `ca_file` (or, knowingly, `insecure_skip_verify`); otherwise retry later. |
-| `response_too_large` | A paged result exceeded 128 KB. | Ask again with a smaller `limit`. |
+| `response_too_large` | A result exceeded 128 KB and could not be cut cleanly (a paged list). | Ask again with a smaller `limit` or fewer values; the CLI's `--json` returns the whole answer. |
 | `file_too_large` | The attachment is over 100 MB. | Read it in the OpenCTI interface instead. |
 | `work_dir_required` | get_report_file had no `work_dir` and no `_meta` key. | Pass `work_dir`: a directory you can read back. |
 | `work_dir_invalid` | `work_dir` is not an absolute path. | Pass an absolute path. |
