@@ -1,7 +1,7 @@
 # RFP: opencti-lookup
 
 > Generated: 2026-11-06
-> Status: Draft
+> Status: Draft (Phase 0 measurements applied — [opencti-lookup-phase0.md](opencti-lookup-phase0.md))
 > Translation of [docs/ja/opencti-lookup-rfp.ja.md](../ja/opencti-lookup-rfp.ja.md) (the Japanese version is primary)
 
 ## 1. Problem Statement
@@ -36,10 +36,10 @@ CLI to isolate it.
 
 | Tool | Question it answers |
 |---|---|
-| `lookup_ioc` | For IP, domain, URL, hash or email values (several at once, capped): the matching observables and indicators with score, confidence, labels, markings (TLP etc.), author, validity window, sightings (when, where, how often observed), the reports containing them and a summary of `indicates` and similar relationships. **Not found is a normal result** |
-| `search_threats` | Search threat actors, intrusion sets, campaigns, malware, tools, attack patterns, vulnerabilities and reports by name, alias or keyword; the type is an enum |
+| `lookup_ioc` | For IP, domain, URL, hash or email values (several at once, capped): the matching observables and indicators with score, confidence, labels, markings (TLP etc.), author, validity window, sightings (when, where, how often observed, and false-positive sightings via `x_opencti_negative`), the reports containing them and a summary of `indicates` and similar relationships. **Not found is a normal result**, worded as "nothing within what this key can see" (not registered and not visible are indistinguishable) |
+| `search_threats` | Search threat actors, intrusion sets, campaigns, malware, tools, attack patterns, vulnerabilities and reports. **Exact match on name, alias or ATT&CK id is tried first**, then full-text search (relevance-ordered, capped); the type is an enum |
 | `get_entity` | One object in detail (description, aliases, external references, markings, author, and for an indicator its pattern) |
-| `get_related` | Walk relationships from one object, filtered by relationship type and target type, with a limit and cursor paging |
+| `get_related` | Walk relationships from one object, filtered by relationship type and target type, with a limit and cursor paging. Per-relationship descriptions are omitted by default and added on request (most of the ~75 KB for APT28's 93 techniques was descriptions) |
 | `get_reports` | The containers (report, note, grouping) holding an object. In OpenCTI this is containment (`objects`), not a relationship, hence separate from `get_related` |
 | `server_status` | Connection check: OpenCTI version and whether it matches the verified version (6.7.4), the key's user name, capabilities and visible markings, and whether TLS is verified |
 | `get_usage` | The manual an agent reads first (tools, arguments, error codes, worked query examples) |
@@ -48,7 +48,7 @@ CLI to isolate it.
 
 | Tool | Question it answers |
 |---|---|
-| `list_recent` | Reports and indicators created or updated in the last N days |
+| `list_recent` | Reports and indicators from the last N days, on a selectable date axis: ingestion time `created_at` (default, "new to this instance"), the source's creation time `created`, or publication date `published` |
 | `get_report_file` | Save a report's attached file (PDF etc.) under `<work_dir>/<workspace_id>/` and return its path, size and type |
 
 ATT&CK technique lists, targeted sectors and the actors exploiting a CVE are all
@@ -71,8 +71,27 @@ siblings). Every subcommand, `mcp` included, accepts `--config <path>`.
 - Every result carries markings, author and confidence. **No verdict
   (malicious/benign) is computed**; OpenCTI's score is passed through
 - Errors are structured (`{code, message}`) and distinguish missing permission
-  (`forbidden`), not found, connection failure and version mismatch
+  (`forbidden`), authentication failure, not found, connection failure and version mismatch
+- **OpenCTI always answers HTTP 200.** Errors are classified by the body's
+  `errors[].extensions.code` (`AUTH_REQUIRED`, `FORBIDDEN_ACCESS`, `FUNCTIONAL_ERROR`,
+  `BAD_USER_INPUT`, …). Storage's `HTTP 503` with `File not found or restricted` means
+  "absent or not visible" and is kept apart from a connection failure
+- **Partial success is never a complete answer.** Any entry in `errors` yields a
+  structured error (a field the key may not read comes back `null` while the others return)
 - A failed query is never reported as "nothing found"
+
+**`lookup_ioc` query rules** (from the Phase 0 measurements)
+
+- Lookup is an exact `eq` on `value`. Full-text search matches prefix-like and is not used
+- IPv4 / IPv6 are canonicalized with `net/netip` before querying (non-canonical IPv6 does not match)
+- A hash is classified as MD5 / SHA-1 / SHA-256 by length and queried under `hashes.<algorithm>` (`value` does not match)
+- OpenCTI matches case-insensitively
+- Sightings come from one `stixSightingRelationships(filters: fromId)` query over the array of indicator ids
+- **Decay is passed through uninterpreted.** OpenCTI rewrites an indicator's `valid_until`,
+  `x_opencti_score` and `revoked` under its decay rules. Revoked indicators are not hidden;
+  `revoked`, the current score, `decay_base_score` and `valid_until` are reported side by side,
+  and observable and indicator scores are reported separately
+- `get_usage` states that confidence is not necessarily the source's (it may be the ingesting user's default)
 - MCP tool schemas are closed (`additionalProperties: false`)
 
 ### Configuration
@@ -97,7 +116,9 @@ siblings). Every subcommand, `mcp` included, accepts `--config <path>`.
 
 - The OpenCTI 6.7.4 GraphQL API (`/graphql`, `Authorization: Bearer <token>`) only
 - For development: an OpenCTI 6.7.4 stack on Podman (platform, worker,
-  Elasticsearch, Redis, RabbitMQ, MinIO, MITRE connector)
+  Elasticsearch, Redis, RabbitMQ, MinIO, STIX import connector, MITRE connector).
+  MinIO's official images are gone, so the release the 6.7.4 compose pinned is
+  built from official source
 
 ## 3. Design Decisions
 
@@ -129,7 +150,9 @@ siblings). Every subcommand, `mcp` included, accepts `--config <path>`.
 
 ## 4. Development Plan
 
-### Phase 0: Development environment and measurement (before code)
+### Phase 0: Development environment and measurement (before code) — done 2026-11-06
+
+Results are in [opencti-lookup-phase0.md](opencti-lookup-phase0.md). What follows is the plan as written.
 
 - Bring an OpenCTI 6.7.4 development stack up and down with a compose file in the
   repository and `make dev-up` / `make dev-down`, based on the official docker setup
@@ -190,8 +213,12 @@ reviewed on their own.
   - `server_status` returns the key's user name, capabilities and visible markings
 - In development, a read-only user is created with the capabilities that
   `server_status` reports in production, and tests run as that user
-- **Residual risk**: the issued key may lack the permission `get_report_file`
-  needs; if so, that tool answers `forbidden` in production
+- With the development read-only user (role `KNOWLEDGE` only), `about`, `me`,
+  knowledge queries and attachment listing and download (`/storage/get/`) all
+  succeed; administrative queries and writes answer `FORBIDDEN_ACCESS`
+- **Residual risk**: the issued production key need not match the development
+  shape. Whether `get_report_file` works is checked in the production check
+  (Phase 3); if not, that tool answers `forbidden`
 
 ## 6. Series Placement
 
@@ -203,8 +230,14 @@ Reason: it is the same kind of tool as the read-only threat-intelligence lookups
 
 - **Version dependence**: the GraphQL schema changes between OpenCTI versions.
   Only 6.7.4, the production version, is verified; `server_status` warns on a mismatch
-- **Unknowns measured in Phase 0**: maximum page size, exact IOC matching, the
-  attached-file fetch path and its permission
+- **Measured in Phase 0** (details in the measurement record)
+  - `first: 5000` returned 1,379 rows at once; any higher ceiling is unmeasured
+    for lack of data. A negative `first` is an error
+  - GraphQL introspection is refused; the schema is read from the OpenCTI
+    repository at tag 6.7.4 (some types, such as Indicator, exist only under `src/modules/`)
+  - HTTP is always 200 (errors in `extensions.code`); storage answers "absent or not visible" with 503
+  - "Not registered" and "not visible to this key" are indistinguishable
+  - Full-text search is relevance-ordered and its total is not a match count
 - **Rate limits**: OpenCTI's own default limit is unconfirmed, and a reverse proxy
   in front may impose one, so 429 and similar are returned as structured errors
 - **Connector images**: platform and worker 6.7.4 ship amd64 and arm64, but the
@@ -218,7 +251,14 @@ Reason: it is the same kind of tool as the read-only threat-intelligence lookups
   looks like instructions is data
 - **Development machine**: the Podman machine is shared with data-toolbox-mcp and
   pcap-analyzer-mcp. 16 GB (about 14 GB usable inside the VM), 6 CPUs,
-  `vm.max_map_count = 1048576` (sufficient by default)
+  `vm.max_map_count = 1048576` (sufficient by default). The running stack uses about 5 GB
+- **Development stack parts**: minio/minio was archived on 2026-04-24 and its public
+  images cannot be pulled. OpenCTI's compose moved to a community fork (pgsty/silo);
+  this project builds from official source instead. podman-compose hangs without an
+  error on an unpullable image
+- **The worker retries rejected elements without logging them.** When fixture ingestion
+  is slow, suspect a rejection first (the real case: `x_opencti_main_observable_type`
+  takes OpenCTI type names such as `IPv4-Addr`; STIX spelling is rejected)
 
 ---
 
@@ -259,3 +299,10 @@ Reason: it is the same kind of tool as the read-only threat-intelligence lookups
 13. **Disabling TLS verification**: requested because the self-hosted instance's
     certificate is not properly set up. The token-exposure risk is accepted with its
     reason; verification stays on by default and `ca_file` is recommended first
+14. **Replacing MinIO** (Phase 0): with the official images gone, the community fork
+    OpenCTI adopted (pinned by digest) was weighed against building from official
+    source; the user chose the source build
+15. **Applying Phase 0**: the seven proposed RFP changes from the measurement record
+    were applied with the user's approval (error classification, `lookup_ioc` query
+    rules and decay, exact match first in `search_threats`, descriptions omitted in
+    `get_related`, the date axis of `list_recent`, the permission results, constraints)

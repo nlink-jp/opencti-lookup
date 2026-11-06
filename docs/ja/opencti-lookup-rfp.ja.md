@@ -1,7 +1,7 @@
 # RFP: opencti-lookup
 
 > Generated: 2026-11-06
-> Status: Draft
+> Status: Draft（Phase 0 の実測を反映済み — [opencti-lookup-phase0.ja.md](opencti-lookup-phase0.ja.md)）
 
 ## 1. Problem Statement
 
@@ -30,10 +30,10 @@ CLI と MCP サーバの二面を持ち、同じエンジンを共有する（�
 
 | ツール | 答える問い |
 |---|---|
-| `lookup_ioc` | IP・ドメイン・URL・ハッシュ・メールアドレスの値（複数可、上限あり）について、一致する observable と indicator を返す。score・confidence・labels・markings（TLP 等）・作成者・有効期間、sighting（いつ・どこで・何回観測されたか）、それを含むレポートと `indicates` 等の関係先の要約を含む。**未登録は正常な結果**として返す |
-| `search_threats` | 攻撃者・intrusion set・campaign・malware・tool・attack pattern・vulnerability・report を名前・別名・キーワードで検索する。種別は enum で指定 |
+| `lookup_ioc` | IP・ドメイン・URL・ハッシュ・メールアドレスの値（複数可、上限あり）について、一致する observable と indicator を返す。score・confidence・labels・markings（TLP 等）・作成者・有効期間、sighting（いつ・どこで・何回観測されたか、誤検知としての目撃 `x_opencti_negative`）、それを含むレポートと `indicates` 等の関係先の要約を含む。**未登録は正常な結果**として返し、「このキーで見える範囲には無い」と表現する（未登録と不可視は区別できない） |
+| `search_threats` | 攻撃者・intrusion set・campaign・malware・tool・attack pattern・vulnerability・report を検索する。**名前・別名・ATT&CK ID の完全一致を先に試し**、無ければ全文検索（関連度順・件数上限つき）。種別は enum で指定 |
 | `get_entity` | 1 件の詳細（説明・別名・外部参照・markings・作成者・indicator ならパターン本文） |
-| `get_related` | 1 件から関係をたどる。関係種別・相手種別で絞り込み、件数指定とカーソルによるページ送り |
+| `get_related` | 1 件から関係をたどる。関係種別・相手種別で絞り込み、件数指定とカーソルによるページ送り。関係ごとの説明文は既定で省き、引数で求められたときに付ける（APT28 の手法 93 件で約 75 KB の大半が説明文だった） |
 | `get_reports` | その対象を含むコンテナ（report・note・grouping）の一覧。OpenCTI では関係ではなく収録（`objects`）なので `get_related` と分ける |
 | `server_status` | 接続確認。OpenCTI の版、検証済みの版（6.7.4）との一致、キーのユーザー名・capabilities・見える markings、TLS 検証の有無 |
 | `get_usage` | エージェントが最初に読む操作説明（ツール・引数・エラーコード・引き方の例） |
@@ -42,7 +42,7 @@ CLI と MCP サーバの二面を持ち、同じエンジンを共有する（�
 
 | ツール | 答える問い |
 |---|---|
-| `list_recent` | 直近 N 日に作成・更新されたレポートや indicator |
+| `list_recent` | 直近 N 日のレポートや indicator。日付の軸を選べる: 取り込まれた日時 `created_at`（既定、「このインスタンスに新しく入った物」）／出典の作成日時 `created`／公開日 `published` |
 | `get_report_file` | レポートの添付ファイル（PDF 等）を `<work_dir>/<workspace_id>/` に保存し、パス・サイズ・種類を返す |
 
 ATT&CK 手法の一覧・標的業種・CVE を悪用する主体などは `get_related` の絞り込みで取れるため
@@ -61,9 +61,27 @@ CLI のサブコマンドは各ツールに対応させる（名前は Phase 1 �
 - 集約・参照リストも含めて**応答全体**に上限を引く（otx-lookup 162 KB の教訓）
 - どの結果にも markings・作成者・confidence を付ける。**判定（悪性/無害）は作らない**。
   OpenCTI の score はそのまま渡す
-- エラーは構造化（`{code, message}`）。権限不足（`forbidden`）・未登録・接続失敗・
-  版不一致を区別する
+- エラーは構造化（`{code, message}`）。権限不足（`forbidden`）・認証失敗・未登録・
+  接続失敗・版不一致を区別する
+- **OpenCTI は HTTP を常に 200 で返す**。エラーの分類は本文の `errors[].extensions.code`
+  （`AUTH_REQUIRED`・`FORBIDDEN_ACCESS`・`FUNCTIONAL_ERROR`・`BAD_USER_INPUT` 等）で行う。
+  ストレージの `HTTP 503` + `File not found or restricted` は「無い、または見えない」であり、
+  接続障害と区別する
+- **部分的な成功を完全な答えにしない**。`errors` が 1 件でもあれば構造化エラーとして返す
+  （権限の無い欄だけが `null` になり、ほかの欄は返ることがある）
 - 失敗した問い合わせを「該当なし」として返さない
+
+**`lookup_ioc` の照会規則**（Phase 0 の実測による）
+
+- 照会は `value` の完全一致（`eq`）。全文検索は前方一致のように当たるので使わない
+- IPv4 / IPv6 は `net/netip` で正規形にしてから問い合わせる（IPv6 の非正規形は当たらない）
+- ハッシュは長さで MD5 / SHA-1 / SHA-256 を判別し、`hashes.<アルゴリズム>` で引く（`value` では当たらない）
+- 大文字小文字は OpenCTI 側が区別しない
+- sighting は indicator の ID の配列で `stixSightingRelationships(filters: fromId)` を 1 回引く
+- **decay を解釈せずに渡す**。OpenCTI は indicator の `valid_until`・`x_opencti_score`・`revoked` を
+  減衰規則で書き換える。失効した indicator も隠さず、`revoked`・現在の点数・`decay_base_score`・
+  `valid_until` を並べる。observable と indicator の点数は別物として返す
+- confidence は出典の値とは限らない（取り込んだユーザーの既定値で埋まることがある）と `get_usage` に書く
 - MCP のツールスキーマは閉じる（`additionalProperties: false`）
 
 ### Configuration
@@ -87,7 +105,8 @@ CLI のサブコマンドは各ツールに対応させる（名前は Phase 1 �
 
 - OpenCTI 6.7.4 の GraphQL API（`/graphql`、`Authorization: Bearer <token>`）のみ
 - 開発用: Podman 上の OpenCTI 6.7.4 一式（platform・worker・Elasticsearch・Redis・
-  RabbitMQ・MinIO・MITRE connector）
+  RabbitMQ・MinIO・STIX 取り込み connector・MITRE connector）。MinIO は公式イメージが
+  消えたため、6.7.4 の構成が固定していた版を公式ソースから自前でビルドする
 
 ## 3. Design Decisions
 
@@ -118,7 +137,9 @@ CLI のサブコマンドは各ツールに対応させる（名前は Phase 1 �
 
 ## 4. Development Plan
 
-### Phase 0: 開発環境と実測（コードより先）
+### Phase 0: 開発環境と実測（コードより先）— 2026-11-06 実施済み
+
+結果は [opencti-lookup-phase0.ja.md](opencti-lookup-phase0.ja.md)。以下は計画時の内容。
 
 - OpenCTI 6.7.4 の開発用環境を、リポジトリ内の compose ファイルと `make dev-up` /
   `make dev-down` で起動・停止できるようにする（公式 docker 構成を元にする）
@@ -178,8 +199,11 @@ Phase 0 の実測記録、Phase 1、Phase 2、Phase 3 はそれぞれ独立に�
   - `server_status` がキーのユーザー名・capabilities・見える markings を返す
 - 開発用環境では、本番で `server_status` が返した capabilities を写した読み取り専用
   ユーザーを作って試験する
-- **残る危険**: `get_report_file` に必要な権限が支給キーに無い可能性がある。その場合
-  本番では `forbidden` を返す機能になる
+- 開発用環境の読み取り専用ユーザー（ロールは `KNOWLEDGE` のみ）で、`about`・`me`・知識の照会・
+  添付ファイルの一覧と取得（`/storage/get/`）がすべて通ることを確認済み。管理用の照会と書き込みは
+  `FORBIDDEN_ACCESS`
+- **残る危険**: 本番の支給キーの権限は開発用の形と同じとは限らない。とくに `get_report_file` が
+  使えるかは本番確認（Phase 3）で確かめる。使えなければ `forbidden` を返す機能になる
 
 ## 6. Series Placement
 
@@ -191,8 +215,14 @@ cve-lookup 等）と同種のツールであり、命名もそれに揃える。
 
 - **版への依存**: GraphQL スキーマは OpenCTI の版で変わる。検証対象は本番と同じ 6.7.4 のみ。
   `server_status` が版の不一致を警告する
-- **Phase 0 で実測する未確認事項**: 1 回の問い合わせの件数上限、IOC 値の完全一致の方法、
-  添付ファイルの取得経路と必要権限
+- **Phase 0 で実測した事項**（詳細は実測記録）
+  - 1 ページの件数は `first: 5000` で 1,379 件を一度に返した。これより上の上限はデータ量が足りず未測定。
+    負の `first` はエラー
+  - GraphQL introspection は拒否される。スキーマは OpenCTI リポジトリの 6.7.4 タグから読む
+    （indicator など一部の型は `src/modules/` 側にしか無い）
+  - HTTP は常に 200（エラーは `extensions.code`）。ストレージは「無い/見えない」を 503 で返す
+  - 「未登録」と「このキーでは見えない」は区別できない
+  - 全文検索は関連度順で、総数は該当件数として使えない
 - **問い合わせ回数の制限**: OpenCTI 本体の既定の制限は未確認。前段のリバースプロキシで
   制限される可能性もあるため、429 等は構造化エラーで返す
 - **connector のイメージ**: platform・worker の 6.7.4 は amd64/arm64 の両方があるが、
@@ -204,7 +234,14 @@ cve-lookup 等）と同種のツールであり、命名もそれに揃える。
   文章であり、誰が書いたものでも入り得る。指示に見える文章もデータとして扱うよう
   `get_usage` に明記する
 - **開発機の制約**: Podman machine は data-toolbox-mcp・pcap-analyzer-mcp と共用。
-  16 GB（VM 内で利用可能 約 14 GB）・6 CPU・`vm.max_map_count = 1048576`（既定で十分）
+  16 GB（VM 内で利用可能 約 14 GB）・6 CPU・`vm.max_map_count = 1048576`（既定で十分）。
+  開発用環境の稼働中は約 5 GB を使う
+- **開発用環境の部品**: minio/minio は 2026-04-24 にアーカイブされ、公開イメージは取得できない。
+  OpenCTI 公式の compose はコミュニティ製フォーク（pgsty/silo）に移ったが、本プロジェクトは
+  公式ソースから自前でビルドする。podman-compose は取得できないイメージでエラーを出さずに止まる
+- **worker は拒否された要素を記録せずに再試行する**。架空データの投入が遅いときは、まず
+  投入データが拒否されていないかを疑う（実例: `x_opencti_main_observable_type` は OpenCTI の
+  型名 `IPv4-Addr` を要求し、STIX 綴りは拒否される）
 
 ---
 
@@ -240,3 +277,8 @@ cve-lookup 等）と同種のツールであり、命名もそれに揃える。
     明示パスが無いときは黙って進まずエラーにする点を変えた。兄弟側の同じ挙動は本件の範囲外
 13. **TLS 検証の無効化**: 自己ホスティングで証明書が整っていないため利用者が要望。
     トークン漏洩の危険を理由つきで受け入れ、既定は検証あり・`ca_file` を先に案内する形にした
+14. **MinIO の代替**（Phase 0）: 公式イメージの消失を受け、OpenCTI 公式が採ったコミュニティ製フォーク
+    （digest 固定で使う案）と、公式ソースからの自前ビルドを比べ、利用者の判断で自前ビルドにした
+15. **Phase 0 の反映**: 実測記録の「RFP への反映候補」7 項目を利用者の承認で反映した
+    （エラー分類、`lookup_ioc` の照会規則と decay、`search_threats` の完全一致優先、
+    `get_related` の説明文省略、`list_recent` の日付の軸、権限の確認結果、外部の制約）
