@@ -459,7 +459,9 @@ func runFile(args []string, stdout, stderr io.Writer) int {
 		// Unlike a lookup, file is an action: when nothing was saved — the
 		// object or the attachment is not there for this key — it fails, so
 		// that "file … && next-step" does not run on a file that is absent.
-		if engine.Code(err) == engine.CodeNotFound || engine.Code(err) == opencti.CodeNotFound {
+		// Too large to save is the same outcome: nothing was written.
+		switch engine.Code(err) {
+		case engine.CodeNotFound, opencti.CodeFileTooLarge: // opencti.CodeNotFound is the same "not_found"
 			fmt.Fprintf(stderr, "opencti-lookup: nothing saved: %s\n", visible(err.Error(), false))
 			return exitError
 		}
@@ -474,7 +476,7 @@ func runFile(args []string, stdout, stderr io.Writer) int {
 	// Every string in the result is the instance's — the attachment's name,
 	// its type, the object's name — and is made inert before printing.
 	forText(res)
-	fmt.Fprintf(stdout, "saved %s (%d bytes, %s, sha256 %s)\n  from %s %s, attachment %s\n",
+	fmt.Fprintf(stdout, "saved %s (%d bytes, %s, sha256 %s)\n  from %s %s, attachment %q\n",
 		res.AbsPath, res.Bytes, res.MimeType, res.SHA256, res.Of.Type, res.Of.Name, res.Name)
 	return exitOK
 }

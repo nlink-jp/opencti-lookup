@@ -63,8 +63,11 @@ func FileName(objectID, upstream string) string {
 		base = base[i+1:]
 	}
 	ext := filepath.Ext(base)
-	if ext == base || len(ext) > 12 || strings.IndexFunc(ext[min(1, len(ext)):], func(r rune) bool { return !isASCIIAlnum(r) }) >= 0 {
-		ext = "" // a dot-file, an overlong or a non-plain extension is part of the stem
+	if ext == base || len(ext) < 2 || len(ext) > 12 || strings.IndexFunc(ext[1:], func(r rune) bool { return !isASCIIAlnum(r) }) >= 0 {
+		// A dot-file, a bare trailing dot (Windows drops it, so the path shown
+		// would not be the file), an overlong or a non-plain extension is
+		// part of the stem, where reduce trims what must not end a name.
+		ext = ""
 	}
 	stem := reduce(strings.TrimSuffix(base, ext))
 	if stem == "" {

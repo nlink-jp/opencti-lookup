@@ -319,3 +319,29 @@ func TestOversizedSingleLookupLosesTailItems(t *testing.T) {
 		t.Fatalf("notes %q", note)
 	}
 }
+
+// When external references are the weight, they go first; the description,
+// which is short, stays whole (the second pre-release review found it emptied).
+func TestOversizedEntityDropsReferencesBeforeAShortDescription(t *testing.T) {
+	big := &engine.Entity{Name: "R", Description: strings.Repeat("d", 3000)}
+	for i := 0; i < 100; i++ {
+		big.ExternalRefs.Items = append(big.ExternalRefs.Items, engine.ExternalRef{Source: "s", Description: strings.Repeat("e", 2000)})
+	}
+	big.ExternalRefs.Total = 100
+	r := exchange(t, &stubEngine{entity: big}, callFrame(1, ToolGetEntity, `{"id":"x"}`))
+	text, isErr := toolResult(t, r[0])
+	if isErr || len(text) > maxResultBytes {
+		t.Fatalf("isErr=%v len=%d", isErr, len(text))
+	}
+	var got engine.Entity
+	_ = json.Unmarshal([]byte(text), &got)
+	if got.Description != strings.Repeat("d", 3000) {
+		t.Fatalf("the description was cut (%d bytes) while references were the weight", len(got.Description))
+	}
+	if n := len(got.ExternalRefs.Items); n == 0 || n == 100 || got.ExternalRefs.Total != 100 {
+		t.Fatalf("%d references kept of %d", n, got.ExternalRefs.Total)
+	}
+	if len(got.Notes) != 1 || !strings.Contains(got.Notes[0], "external references omitted") {
+		t.Fatalf("notes %v", got.Notes)
+	}
+}

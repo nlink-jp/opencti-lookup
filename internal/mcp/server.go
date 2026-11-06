@@ -240,9 +240,21 @@ func trimTail(v any, over int) (any, bool) {
 		r.Notes = upsertDropped(r.Notes, "rows omitted for size from the end of this list: ", "1")
 		return r, true
 	case *engine.Entity:
+		// Cut the largest of the three parts that can grow — the description,
+		// the pattern, the external references taken together — one step at a
+		// time. The part that is the weight goes first, so a short description
+		// is never emptied to make room for references that were the real
+		// weight (the second pre-release review found exactly that).
 		const whole = " (the CLI's entity --json returns it whole)"
+		refs := 0
+		for _, x := range r.ExternalRefs.Items {
+			refs += len(x.Source) + len(x.URL) + len(x.ExternalID) + len(x.Description) + 64
+		}
 		switch {
-		case len(r.Description) > len(r.Pattern) && len(r.Description) > 1024:
+		case len(r.ExternalRefs.Items) > 0 && refs >= len(r.Description) && refs >= len(r.Pattern):
+			r.ExternalRefs.Items = r.ExternalRefs.Items[:len(r.ExternalRefs.Items)-1]
+			r.Notes = upsertDropped(r.Notes, "external references omitted for size"+whole+": ", "1")
+		case len(r.Description) > 1024 && len(r.Description) >= len(r.Pattern):
 			r.Description, r.Notes = shorten(r.Description, over, "description", whole, r.Notes)
 		case len(r.Pattern) > 1024:
 			r.Pattern, r.Notes = shorten(r.Pattern, over, "pattern", whole, r.Notes)

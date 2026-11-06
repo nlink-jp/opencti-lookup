@@ -25,6 +25,7 @@ func TestFileName(t *testing.T) {
 		"name\x00.pdf":            "name.pdf",
 		"report.pdf\u202egpj.exe": "report.pdf_gpj.exe",
 		"archive.tar.gz":          "archive.tar.gz",
+		"report.":                 "report",
 		"x.verylongextensionname": "x.verylongextensionname",
 		"notes.téxt":              "notes.t_xt",
 	}
