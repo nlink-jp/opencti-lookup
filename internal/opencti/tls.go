@@ -18,10 +18,10 @@ const withRisk = "or — knowing the token can then be read on the path — set 
 // what the operator can do about it. ca_file only fixes an unknown issuer:
 // a certificate that names its host only in the legacy Common Name, names
 // another host, is out of date or is not for server use is refused whoever
-// issued it, so for those the message says so instead of sending the operator to ca_file (measured on a
-// production instance, 2026-11-07: a CN-only self-signed certificate first
-// failed as "unknown authority", and only after ca_file was set did the real
-// cause appear). The certificate the server presented is examined even when
+// issued it, so for those the message says so instead of sending the
+// operator to ca_file (measured on a production instance, 2026-11-07: a
+// CN-only self-signed certificate first failed as "unknown authority", and
+// only after ca_file was set did the real cause appear). The certificate the server presented is examined even when
 // verification stopped at the issuer, so the real cause is named first time.
 //
 // host is the host the client connected to; ok is false when err is not a
