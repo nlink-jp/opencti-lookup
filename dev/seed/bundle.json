@@ -173,7 +173,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 85
   },
   {
@@ -239,7 +239,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "domain-name",
+   "x_opencti_main_observable_type": "Domain-Name",
    "x_opencti_score": 75
   },
   {
@@ -305,7 +305,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "url",
+   "x_opencti_main_observable_type": "Url",
    "x_opencti_score": 70
   },
   {
@@ -374,7 +374,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "file",
+   "x_opencti_main_observable_type": "StixFile",
    "x_opencti_score": 90
   },
   {
@@ -440,7 +440,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "email-addr",
+   "x_opencti_main_observable_type": "Email-Addr",
    "x_opencti_score": 60
   },
   {
@@ -506,7 +506,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv6-addr",
+   "x_opencti_main_observable_type": "IPv6-Addr",
    "x_opencti_score": 50
   },
   {
@@ -572,7 +572,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2026-09-15T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 20
   },
   {
@@ -638,7 +638,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 95
   },
   {
@@ -722,7 +722,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -788,7 +788,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -854,7 +854,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -920,7 +920,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -986,7 +986,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1052,7 +1052,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1118,7 +1118,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1184,7 +1184,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1250,7 +1250,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1316,7 +1316,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1382,7 +1382,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1448,7 +1448,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1514,7 +1514,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1580,7 +1580,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1646,7 +1646,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1712,7 +1712,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1778,7 +1778,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1844,7 +1844,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1910,7 +1910,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -1976,7 +1976,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2042,7 +2042,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2108,7 +2108,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2174,7 +2174,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2240,7 +2240,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2306,7 +2306,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2372,7 +2372,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2438,7 +2438,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2504,7 +2504,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2570,7 +2570,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2636,7 +2636,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2702,7 +2702,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2768,7 +2768,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2834,7 +2834,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2900,7 +2900,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -2966,7 +2966,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3032,7 +3032,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3098,7 +3098,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3164,7 +3164,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3230,7 +3230,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3296,7 +3296,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3362,7 +3362,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3428,7 +3428,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3494,7 +3494,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3560,7 +3560,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3626,7 +3626,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3692,7 +3692,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3758,7 +3758,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3824,7 +3824,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3890,7 +3890,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -3956,7 +3956,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4022,7 +4022,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4088,7 +4088,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4154,7 +4154,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4220,7 +4220,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4286,7 +4286,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4352,7 +4352,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4418,7 +4418,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4484,7 +4484,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4550,7 +4550,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4616,7 +4616,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4682,7 +4682,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4748,7 +4748,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4814,7 +4814,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4880,7 +4880,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -4946,7 +4946,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5012,7 +5012,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5078,7 +5078,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5144,7 +5144,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5210,7 +5210,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5276,7 +5276,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5342,7 +5342,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5408,7 +5408,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5474,7 +5474,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5540,7 +5540,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5606,7 +5606,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5672,7 +5672,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5738,7 +5738,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5804,7 +5804,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5870,7 +5870,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -5936,7 +5936,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6002,7 +6002,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6068,7 +6068,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6134,7 +6134,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6200,7 +6200,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6266,7 +6266,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6332,7 +6332,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6398,7 +6398,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6464,7 +6464,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6530,7 +6530,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6596,7 +6596,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6662,7 +6662,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6728,7 +6728,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6794,7 +6794,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6860,7 +6860,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6926,7 +6926,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -6992,7 +6992,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7058,7 +7058,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7124,7 +7124,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7190,7 +7190,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7256,7 +7256,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7322,7 +7322,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7388,7 +7388,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7454,7 +7454,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7520,7 +7520,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7586,7 +7586,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7652,7 +7652,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7718,7 +7718,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7784,7 +7784,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7850,7 +7850,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7916,7 +7916,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -7982,7 +7982,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -8048,7 +8048,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -8114,7 +8114,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -8180,7 +8180,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -8246,7 +8246,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -8312,7 +8312,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -8378,7 +8378,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -8444,7 +8444,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -8510,7 +8510,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {
@@ -8576,7 +8576,7 @@
    "type": "indicator",
    "valid_from": "2026-09-01T00:00:00.000Z",
    "valid_until": "2027-12-31T00:00:00.000Z",
-   "x_opencti_main_observable_type": "ipv4-addr",
+   "x_opencti_main_observable_type": "IPv4-Addr",
    "x_opencti_score": 40
   },
   {

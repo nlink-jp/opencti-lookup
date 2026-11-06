@@ -35,6 +35,20 @@ TLP = {
 }
 
 
+# x_opencti_main_observable_type takes OpenCTI's entity type names, not STIX
+# type names: "ipv4-addr" is rejected with "Observable type ipv4-addr is not
+# supported." (measured on 6.7.4), and the worker retries the rejected
+# indicator silently, stalling everything that depends on it.
+OPENCTI_OBSERVABLE_TYPE = {
+    "ipv4-addr": "IPv4-Addr",
+    "ipv6-addr": "IPv6-Addr",
+    "domain-name": "Domain-Name",
+    "url": "Url",
+    "file": "StixFile",
+    "email-addr": "Email-Addr",
+}
+
+
 def sid(kind, name):
     return f"{kind}--{uuid.uuid5(NS, kind + ':' + name)}"
 
@@ -165,7 +179,7 @@ def ioc(key, value, pattern, observable, score, marking="green", valid_until="20
             "created_by_ref": author,
             "object_marking_refs": [TLP[marking]],
             "x_opencti_score": score,
-            "x_opencti_main_observable_type": observable["type"],
+            "x_opencti_main_observable_type": OPENCTI_OBSERVABLE_TYPE[observable["type"]],
         }
     )
     rel("based-on", ind, obs["id"], marking=marking)
