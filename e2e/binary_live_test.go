@@ -135,4 +135,29 @@ func TestBinaryMCP(t *testing.T) {
 	if isErr || !strings.Contains(text, `"version_matches": true`) || !strings.Contains(text, `"KNOWLEDGE"`) {
 		t.Fatalf("server_status: %s", text)
 	}
+
+	// get_report_file: work_dir from the argument, then from _meta, then none.
+	report := greenReport(t, readonly(t))
+	work := t.TempDir()
+	text, isErr = tool(6, "get_report_file", map[string]any{"id": report, "name": "fixture-report.pdf", "work_dir": work})
+	var saved struct {
+		AbsPath string `json:"abs_path"`
+		Bytes   int64  `json:"bytes"`
+	}
+	if isErr || json.Unmarshal([]byte(text), &saved) != nil || saved.Bytes != 618 {
+		t.Fatalf("get_report_file: %s", text)
+	}
+	if b, err := os.ReadFile(saved.AbsPath); err != nil || len(b) != 618 {
+		t.Fatalf("%v %d", err, len(b))
+	}
+	r := call(7, "tools/call", map[string]any{"name": "get_report_file",
+		"arguments": map[string]any{"id": report, "name": "escape attempt.txt"},
+		"_meta":     map[string]any{"jp.nlink/work_dir": work}})
+	if res := r["result"].(map[string]any); res["isError"] == true {
+		t.Fatalf("_meta work_dir: %v", res)
+	}
+	text, isErr = tool(8, "get_report_file", map[string]any{"id": report, "name": "fixture-report.pdf"})
+	if !isErr || !strings.Contains(text, `"work_dir_required"`) {
+		t.Fatalf("no work_dir: %s", text)
+	}
 }
