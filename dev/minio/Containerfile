@@ -1,0 +1,37 @@
+# MinIO server built from the official, archived source for the dev stack.
+#
+# Why: the upstream repository (github.com/minio/minio) was archived on
+# 2026-04-24 and every minio/minio image was removed from Docker Hub and
+# quay.io, so the image the OpenCTI 6.7.4 compose pinned can no longer be
+# pulled. OpenCTI's current compose moved to a community fork; this project
+# builds the same release the 6.7.4 stack used from first-party source
+# instead (organization supply-chain policy). Development use only — nothing
+# here is shipped.
+#
+# Base images are pinned by digest. The checked-out commit is verified
+# against the tag's recorded commit before building.
+
+ARG MINIO_TAG=RELEASE.2024-05-28T17-19-04Z
+# The commit the annotated tag points at (not the tag object's own id,
+# f92beb79…, which the refs API returns first).
+ARG MINIO_COMMIT=f79a4ef4d0dc3e6562cad0d1d1db674bc8c75531
+
+FROM docker.io/library/golang:1.22.12-bookworm@sha256:3d699e4d15d0f8f13c9195c0632a16702b8cbdece2955af1c23b37ae5d55a253 AS build
+ARG MINIO_TAG
+ARG MINIO_COMMIT
+WORKDIR /src
+RUN git clone --depth 1 --branch "${MINIO_TAG}" https://github.com/minio/minio.git . \
+ && test "$(git rev-parse HEAD)" = "${MINIO_COMMIT}"
+RUN CGO_ENABLED=0 go build -trimpath -tags kqueue \
+      -ldflags "-s -w \
+        -X github.com/minio/minio/cmd.Version=2024-05-28T17:19:04Z \
+        -X github.com/minio/minio/cmd.ReleaseTag=${MINIO_TAG} \
+        -X github.com/minio/minio/cmd.CommitID=${MINIO_COMMIT} \
+        -X github.com/minio/minio/cmd.ShortCommitID=${MINIO_COMMIT}" \
+      -o /out/minio .
+
+FROM docker.io/library/alpine:3.20.6@sha256:de4fe7064d8f98419ea6b49190df1abbf43450c1702eeb864fe9ced453c1cc5f
+COPY --from=build /out/minio /usr/bin/minio
+EXPOSE 9000
+ENTRYPOINT ["/usr/bin/minio"]
+CMD ["server", "/data"]
