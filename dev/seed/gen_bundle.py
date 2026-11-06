@@ -316,6 +316,137 @@ report(
     "Fictional report holding 120 indicators and their observables.",
 )
 
+# --- Shapes added after the first independent verification pass ----------
+
+# An indicator with no observable behind it: common in real feeds, and
+# invisible to a lookup that enters through observables only.
+orphan = add(
+    {
+        "type": "indicator",
+        "id": sid("indicator", "orphan.example.org"),
+        "created": CREATED,
+        "modified": MODIFIED,
+        "name": "orphan.example.org",
+        "description": "Fixture indicator with no observable (pattern only).",
+        "pattern": "[domain-name:value = 'orphan.example.org']",
+        "pattern_type": "stix",
+        "valid_from": "2026-09-01T00:00:00.000Z",
+        "valid_until": "2027-12-31T00:00:00.000Z",
+        "labels": ["fixture", "orphan"],
+        "created_by_ref": author,
+        "object_marking_refs": [TLP["green"]],
+        "x_opencti_score": 65,
+        "x_opencti_main_observable_type": "Domain-Name",
+    }
+)
+rel("indicates", orphan, malware)
+
+# An IPv6 observable stored in expanded, upper-case form: OpenCTI does not
+# canonicalize stored values, so a canonical-only query would miss it.
+add(
+    {
+        "type": "ipv6-addr",
+        "id": sid("ipv6-addr", "2001:0DB8:0000:0000:0000:0000:0000:0020"),
+        "value": "2001:0DB8:0000:0000:0000:0000:0000:0020",
+        "object_marking_refs": [TLP["green"]],
+        "x_opencti_score": 45,
+        "x_opencti_created_by_ref": author,
+    }
+)
+
+# A file carrying MD5, SHA-1 and SHA-512 (the first file has SHA-256 only).
+sample2 = "opencti-lookup fixture sample 2"
+hashes2 = {
+    "MD5": hashlib.md5(sample2.encode()).hexdigest(),
+    "SHA-1": hashlib.sha1(sample2.encode()).hexdigest(),
+    "SHA-512": hashlib.sha512(sample2.encode()).hexdigest(),
+}
+file2_ind, file2_obs = ioc(
+    "md5",
+    hashes2["MD5"],
+    f"[file:hashes.MD5 = '{hashes2['MD5']}']",
+    {"type": "file", "hashes": hashes2, "name": "fixture2.bin"},
+    80,
+)
+
+# A fictional vulnerability (CVE-2099 does not exist) the actor targets.
+vuln = sdo(
+    "vulnerability",
+    "CVE-2099-0001",
+    description="Fictional vulnerability used only by opencti-lookup tests.",
+    created_by_ref=author,
+    object_marking_refs=[TLP["green"]],
+    external_references=[{"source_name": "cve", "external_id": "CVE-2099-0001"}],
+)
+rel("targets", actor, vuln)
+
+# A note and a grouping, the two container types besides report.
+add(
+    {
+        "type": "note",
+        "id": sid("note", "fixture-note-1"),
+        "created": CREATED,
+        "modified": MODIFIED,
+        "abstract": "Fixture analyst note",
+        "content": "Fictional analyst note about 192.0.2.10 and FIXTURE-HERON.",
+        "object_refs": [ip_obs, ip_ind, actor],
+        "created_by_ref": author,
+        "object_marking_refs": [TLP["green"]],
+    }
+)
+sdo(
+    "grouping",
+    "Fixture grouping: Heron leads",
+    context="suspicious-activity",
+    description="Fictional grouping used only by opencti-lookup tests.",
+    object_refs=[ip_obs, dom_obs, actor],
+    created_by_ref=author,
+    object_marking_refs=[TLP["green"]],
+)
+
+# A false-positive sighting of the same indicator, by a second organization.
+victim2 = sdo(
+    "identity",
+    "Example Bank (fixture)",
+    identity_class="organization",
+    description="Fictional organization that reported a false positive.",
+)
+add(
+    {
+        "type": "sighting",
+        "id": sid("sighting", "192.0.2.10@Example Bank negative"),
+        "created": CREATED,
+        "modified": MODIFIED,
+        "sighting_of_ref": ip_ind,
+        "where_sighted_refs": [victim2],
+        "count": 1,
+        "first_seen": "2026-09-25T00:00:00.000Z",
+        "last_seen": "2026-09-25T00:00:00.000Z",
+        "created_by_ref": author,
+        "object_marking_refs": [TLP["green"]],
+        "x_opencti_negative": True,
+    }
+)
+
+# A sighting of an observable. STIX 2.1 only allows SDOs in sighting_of_ref;
+# OpenCTI's own UI can sight observables. Placed last so that a rejection
+# (which the worker retries silently) blocks nothing else.
+add(
+    {
+        "type": "sighting",
+        "id": sid("sighting", "bad.example.com@Example Corp"),
+        "created": CREATED,
+        "modified": MODIFIED,
+        "sighting_of_ref": dom_obs,
+        "where_sighted_refs": [victim],
+        "count": 2,
+        "first_seen": "2026-09-21T00:00:00.000Z",
+        "last_seen": "2026-09-21T06:00:00.000Z",
+        "created_by_ref": author,
+        "object_marking_refs": [TLP["green"]],
+    }
+)
+
 bundle = {
     "type": "bundle",
     "id": f"bundle--{uuid.uuid5(NS, 'bundle')}",

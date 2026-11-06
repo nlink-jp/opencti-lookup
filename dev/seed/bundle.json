@@ -8953,6 +8953,242 @@
    ],
    "spec_version": "2.1",
    "type": "report"
+  },
+  {
+   "created": "2026-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "description": "Fixture indicator with no observable (pattern only).",
+   "id": "indicator--703cb44e-8af9-5342-a772-13674e7862a2",
+   "labels": [
+    "fixture",
+    "orphan"
+   ],
+   "modified": "2026-10-01T00:00:00.000Z",
+   "name": "orphan.example.org",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "pattern": "[domain-name:value = 'orphan.example.org']",
+   "pattern_type": "stix",
+   "spec_version": "2.1",
+   "type": "indicator",
+   "valid_from": "2026-09-01T00:00:00.000Z",
+   "valid_until": "2027-12-31T00:00:00.000Z",
+   "x_opencti_main_observable_type": "Domain-Name",
+   "x_opencti_score": 65
+  },
+  {
+   "created": "2026-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "id": "relationship--6ea1750f-bb08-5809-930d-9715116aab5d",
+   "modified": "2026-10-01T00:00:00.000Z",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "relationship_type": "indicates",
+   "source_ref": "indicator--703cb44e-8af9-5342-a772-13674e7862a2",
+   "spec_version": "2.1",
+   "target_ref": "malware--2550386f-2489-56de-9f11-81911852d2fc",
+   "type": "relationship"
+  },
+  {
+   "id": "ipv6-addr--9a193d6c-8d45-5d42-a25b-3d15ed2cc5c3",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "spec_version": "2.1",
+   "type": "ipv6-addr",
+   "value": "2001:0DB8:0000:0000:0000:0000:0000:0020",
+   "x_opencti_created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "x_opencti_score": 45
+  },
+  {
+   "hashes": {
+    "MD5": "63e5896b25163a4cde6d19885eb9f9ad",
+    "SHA-1": "748885c8b266b1d8ae6184cf0769eca401e4308b",
+    "SHA-512": "88cc5f55e307df11bc6655168e10e2c1e898ab08e3b45743b1771a803a4e96052cccf040eb4f8e201e5ef5ac52bea4769342efb129a28e9d44c0e4cba24d3e8a"
+   },
+   "id": "file--2d87b5a9-40d6-584c-8d3e-b46097237235",
+   "name": "fixture2.bin",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "spec_version": "2.1",
+   "type": "file",
+   "x_opencti_created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "x_opencti_score": 80
+  },
+  {
+   "confidence": 70,
+   "created": "2026-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "description": "Fixture indicator (md5).",
+   "id": "indicator--6d38975c-e039-5536-b93d-dbde2805a913",
+   "indicator_types": [
+    "malicious-activity"
+   ],
+   "labels": [
+    "fixture",
+    "md5"
+   ],
+   "modified": "2026-10-01T00:00:00.000Z",
+   "name": "63e5896b25163a4cde6d19885eb9f9ad",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "pattern": "[file:hashes.MD5 = '63e5896b25163a4cde6d19885eb9f9ad']",
+   "pattern_type": "stix",
+   "spec_version": "2.1",
+   "type": "indicator",
+   "valid_from": "2026-09-01T00:00:00.000Z",
+   "valid_until": "2027-12-31T00:00:00.000Z",
+   "x_opencti_main_observable_type": "StixFile",
+   "x_opencti_score": 80
+  },
+  {
+   "created": "2026-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "id": "relationship--a3c88bca-5c51-5e4a-9fc8-e94bc61611a5",
+   "modified": "2026-10-01T00:00:00.000Z",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "relationship_type": "based-on",
+   "source_ref": "indicator--6d38975c-e039-5536-b93d-dbde2805a913",
+   "spec_version": "2.1",
+   "target_ref": "file--2d87b5a9-40d6-584c-8d3e-b46097237235",
+   "type": "relationship"
+  },
+  {
+   "created": "2026-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "id": "relationship--82d45c98-ac22-5418-8833-ec89689b7cdf",
+   "modified": "2026-10-01T00:00:00.000Z",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "relationship_type": "indicates",
+   "source_ref": "indicator--6d38975c-e039-5536-b93d-dbde2805a913",
+   "spec_version": "2.1",
+   "target_ref": "malware--2550386f-2489-56de-9f11-81911852d2fc",
+   "type": "relationship"
+  },
+  {
+   "created": "2026-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "description": "Fictional vulnerability used only by opencti-lookup tests.",
+   "external_references": [
+    {
+     "external_id": "CVE-2099-0001",
+     "source_name": "cve"
+    }
+   ],
+   "id": "vulnerability--9a3f3fd6-9c72-5f18-bde5-215554c85e20",
+   "modified": "2026-10-01T00:00:00.000Z",
+   "name": "CVE-2099-0001",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "spec_version": "2.1",
+   "type": "vulnerability"
+  },
+  {
+   "created": "2026-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "id": "relationship--372c8e97-3fe9-53f3-80a7-528b55e11432",
+   "modified": "2026-10-01T00:00:00.000Z",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "relationship_type": "targets",
+   "source_ref": "intrusion-set--3f4a2a9b-a284-5148-90f9-bc400a2df4a2",
+   "spec_version": "2.1",
+   "target_ref": "vulnerability--9a3f3fd6-9c72-5f18-bde5-215554c85e20",
+   "type": "relationship"
+  },
+  {
+   "abstract": "Fixture analyst note",
+   "content": "Fictional analyst note about 192.0.2.10 and FIXTURE-HERON.",
+   "created": "2026-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "id": "note--03b117b0-93c5-513f-8d88-0e474441143e",
+   "modified": "2026-10-01T00:00:00.000Z",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "object_refs": [
+    "ipv4-addr--a0e79032-9c8d-56fb-8fde-fa2d12aac11d",
+    "indicator--1a47a7ac-231f-52ac-9789-2d8b0b8a369a",
+    "intrusion-set--3f4a2a9b-a284-5148-90f9-bc400a2df4a2"
+   ],
+   "spec_version": "2.1",
+   "type": "note"
+  },
+  {
+   "context": "suspicious-activity",
+   "created": "2026-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "description": "Fictional grouping used only by opencti-lookup tests.",
+   "id": "grouping--7dc99435-dfe0-5d5a-a35d-dc0f7566c448",
+   "modified": "2026-10-01T00:00:00.000Z",
+   "name": "Fixture grouping: Heron leads",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "object_refs": [
+    "ipv4-addr--a0e79032-9c8d-56fb-8fde-fa2d12aac11d",
+    "domain-name--47d064e2-8d7c-5557-bf82-1abfc5e3fca3",
+    "intrusion-set--3f4a2a9b-a284-5148-90f9-bc400a2df4a2"
+   ],
+   "spec_version": "2.1",
+   "type": "grouping"
+  },
+  {
+   "created": "2026-10-01T00:00:00.000Z",
+   "description": "Fictional organization that reported a false positive.",
+   "id": "identity--645c7ce1-91c7-59e6-a995-64d69c0accbb",
+   "identity_class": "organization",
+   "modified": "2026-10-01T00:00:00.000Z",
+   "name": "Example Bank (fixture)",
+   "spec_version": "2.1",
+   "type": "identity"
+  },
+  {
+   "count": 1,
+   "created": "2026-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "first_seen": "2026-09-25T00:00:00.000Z",
+   "id": "sighting--1f786f7b-15a1-5657-a48a-6c71af4e2a82",
+   "last_seen": "2026-09-25T00:00:00.000Z",
+   "modified": "2026-10-01T00:00:00.000Z",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "sighting_of_ref": "indicator--1a47a7ac-231f-52ac-9789-2d8b0b8a369a",
+   "spec_version": "2.1",
+   "type": "sighting",
+   "where_sighted_refs": [
+    "identity--645c7ce1-91c7-59e6-a995-64d69c0accbb"
+   ],
+   "x_opencti_negative": true
+  },
+  {
+   "count": 2,
+   "created": "2026-10-01T00:00:00.000Z",
+   "created_by_ref": "identity--a03a436e-660c-59bb-aeda-38d0d4b8e3b9",
+   "first_seen": "2026-09-21T00:00:00.000Z",
+   "id": "sighting--d224f81f-8011-51c5-8ac9-409f14243b5e",
+   "last_seen": "2026-09-21T06:00:00.000Z",
+   "modified": "2026-10-01T00:00:00.000Z",
+   "object_marking_refs": [
+    "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"
+   ],
+   "sighting_of_ref": "domain-name--47d064e2-8d7c-5557-bf82-1abfc5e3fca3",
+   "spec_version": "2.1",
+   "type": "sighting",
+   "where_sighted_refs": [
+    "identity--fc8d3e2d-05b6-57fd-870c-2ceaacd5ed41"
+   ]
   }
  ],
  "type": "bundle"
