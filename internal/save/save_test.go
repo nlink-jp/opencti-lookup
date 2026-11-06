@@ -12,15 +12,15 @@ import (
 func TestFileName(t *testing.T) {
 	id := "84ec431c-fe0f-4b73-b1b1-bdc344fded85"
 	cases := map[string]string{
-		"fixture-report.pdf":       "opencti-lookup-84ec431c-fixture-report.pdf",
-		"escape attempt.txt":       "opencti-lookup-84ec431c-escape_attempt.txt",
-		"../../etc/passwd":         "opencti-lookup-84ec431c-passwd",
-		`..\..\win.ini`:            "opencti-lookup-84ec431c-win.ini",
-		".env":                     "opencti-lookup-84ec431c-env",
-		"報告書.pdf":                  "opencti-lookup-84ec431c-pdf",
-		"a;rm -rf ~;$(x).sh":       "opencti-lookup-84ec431c-a_rm_-rf_x_.sh",
-		"":                         "opencti-lookup-84ec431c-file",
-		"name\x00.pdf":             "opencti-lookup-84ec431c-name_.pdf",
+		"fixture-report.pdf":      "opencti-lookup-84ec431c-fixture-report.pdf",
+		"escape attempt.txt":      "opencti-lookup-84ec431c-escape_attempt.txt",
+		"../../etc/passwd":        "opencti-lookup-84ec431c-passwd",
+		`..\..\win.ini`:           "opencti-lookup-84ec431c-win.ini",
+		".env":                    "opencti-lookup-84ec431c-env",
+		"報告書.pdf":                 "opencti-lookup-84ec431c-pdf",
+		"a;rm -rf ~;$(x).sh":      "opencti-lookup-84ec431c-a_rm_-rf_x_.sh",
+		"":                        "opencti-lookup-84ec431c-file",
+		"name\x00.pdf":            "opencti-lookup-84ec431c-name_.pdf",
 		"report.pdf\u202egpj.exe": "opencti-lookup-84ec431c-report.pdf_gpj.exe",
 	}
 	for in, want := range cases {
