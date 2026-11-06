@@ -225,25 +225,34 @@ func TestUpstreamErrorPassesThrough(t *testing.T) {
 }
 
 func TestCursorAndPage(t *testing.T) {
-	p := pageOf(130, 50, cursor{}, "c1")
-	if p.Remaining != 80 || p.NextCursor == "" {
+	q := fingerprint("related", "id-1", "uses", "")
+	first, _ := decodeCursor("", q)
+	p := pageOf(130, 50, 50, first, "c1")
+	if p.Remaining != 80 || p.NextCursor == "" || p.Limit != 50 {
 		t.Fatalf("%+v", p)
 	}
-	c, err := decodeCursor(p.NextCursor)
-	if err != nil || c.Seen != 50 || c.After != "c1" {
+	c, err := decodeCursor(p.NextCursor, q)
+	if err != nil || c.Seen != 50 || c.After != "c1" || c.Query != q {
 		t.Fatalf("%+v %v", c, err)
 	}
-	last := pageOf(130, 30, cursor{After: "c2", Seen: 100}, "c3")
+	// A cursor continues only the query it came from.
+	if _, err := decodeCursor(p.NextCursor, fingerprint("related", "id-1", "", "")); Code(err) != CodeInvalidArgument {
+		t.Fatalf("a cursor was accepted for other filters: %v", err)
+	}
+	if _, err := decodeCursor(p.NextCursor, ""); err != nil {
+		t.Fatalf("the form check must accept a well-formed cursor: %v", err)
+	}
+	last := pageOf(130, 30, 50, cursor{After: "c2", Seen: 100, Query: q}, "c3")
 	if last.Remaining != 0 || last.NextCursor != "" {
 		t.Fatalf("last page %+v", last)
 	}
 	// OpenCTI said nothing more but the total says otherwise: the gap is reported.
-	short := pageOf(10, 4, cursor{}, "")
+	short := pageOf(10, 4, 25, cursor{Query: q}, "")
 	if short.Remaining != 6 {
 		t.Fatalf("short %+v", short)
 	}
 	for _, bad := range []string{"%%%", "eyJ4IjoxfQ"} {
-		if _, err := decodeCursor(bad); Code(err) != CodeInvalidArgument {
+		if _, err := decodeCursor(bad, q); Code(err) != CodeInvalidArgument {
 			t.Errorf("cursor %q accepted", bad)
 		}
 	}
@@ -416,13 +425,16 @@ func TestGetRelatedRefusals(t *testing.T) {
 func TestGetReports(t *testing.T) {
 	f := &fake{replies: map[string]string{"Exists": existsReply, "Containers": `{"containers":{"pageInfo":{"globalCount":4,"endCursor":"E"},"edges":[
 	  {"node":{"id":"rep-1","entity_type":"Report","representative":{"main":"R1"},"created":"2026-10-01","published":"2026-10-02","objectMarking":[{"definition":"TLP:GREEN"}],"createdBy":{"name":"CERT"}}}]}}`}}
-	c, _ := decodeCursor(encodeCursor(cursor{After: "PREV", Seen: 2}))
-	res, err := newEngine(f).GetReports(context.Background(), "is-1", 1, encodeCursor(c))
+	prev := encodeCursor(cursor{After: "PREV", Seen: 2, Query: fingerprint("reports", "is-1")})
+	res, err := newEngine(f).GetReports(context.Background(), "is-1", 1, prev)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if res.Total != 4 || res.Remaining != 1 || res.Containers[0].Published != "2026-10-02" || res.Containers[0].Markings[0] != "TLP:GREEN" {
 		t.Fatalf("%+v", res)
+	}
+	if _, err := newEngine(f).GetReports(context.Background(), "is-1", 1, encodeCursor(cursor{After: "X", Seen: 1, Query: fingerprint("recent", "report", "created_at", "7")})); Code(err) != CodeInvalidArgument {
+		t.Fatalf("a list_recent cursor was accepted by get_reports: %v", err)
 	}
 	if f.varsOf("Containers")["after"] != "PREV" {
 		t.Fatal("cursor not forwarded")

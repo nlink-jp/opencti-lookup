@@ -130,7 +130,9 @@ The relationships of one object.
   answer it with no rows.
 - `with_descriptions`: include each relationship's `description` (default
   false; descriptions are about a third of a long list).
-- `limit`, `cursor`: paging. Pass `next_cursor` back unchanged.
+- `limit`, `cursor`: paging. Pass `next_cursor` back unchanged, with the
+  same `id` and filters: a cursor continues only the list it came from, and
+  any other use is `invalid_argument`.
 
 `of` names the object once. Each row has `relationship`, `direction`
 (`outgoing`: object → other; `incoming`: other → object), `other`, and
@@ -166,7 +168,9 @@ first.
   `published` — a report's publication date. An indicator has no
   `published`, and asking for it is `invalid_argument` (OpenCTI would answer
   with no rows).
-- `days`: 1-365 (default 7). `since` in the answer is the exact start.
+- `days`: 1-365 (default 7). `since` in the answer is the exact start; a
+  continuation keeps the first page's `since`, so new arrivals do not shift
+  the pages.
 - `limit`, `cursor`: paging, as in get_related.
 
 Rows carry `name`, `markings`, `created_by`, the three dates where present,

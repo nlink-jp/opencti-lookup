@@ -44,6 +44,26 @@ func TestListRecent(t *testing.T) {
 	}
 }
 
+// A continuation keeps the window of its first page, even when the clock moved.
+func TestListRecentKeepsItsWindow(t *testing.T) {
+	prev := now
+	t.Cleanup(func() { now = prev })
+	now = func() time.Time { return time.Date(2026, 11, 6, 12, 0, 0, 0, time.UTC) }
+	f := &fake{replies: map[string]string{"Recent": `{"reports":{"pageInfo":{"globalCount":3,"endCursor":"E"},"edges":[{"node":{"id":"r1","entity_type":"Report","representative":{"main":"R1"},"objectMarking":[]}}]}}`}}
+	first, err := newEngine(f).ListRecent(context.Background(), RecentQuery{Limit: 1})
+	if err != nil || first.NextCursor == "" {
+		t.Fatalf("%v %+v", err, first)
+	}
+	now = func() time.Time { return time.Date(2026, 11, 9, 0, 0, 0, 0, time.UTC) }
+	second, err := newEngine(f).ListRecent(context.Background(), RecentQuery{Limit: 1, Cursor: first.NextCursor})
+	if err != nil || second.Since != first.Since {
+		t.Fatalf("since moved from %s to %s (%v)", first.Since, second.Since, err)
+	}
+	if _, err := newEngine(f).ListRecent(context.Background(), RecentQuery{Limit: 1, Days: 30, Cursor: first.NextCursor}); Code(err) != CodeInvalidArgument {
+		t.Fatalf("a cursor for 7 days was accepted for 30: %v", err)
+	}
+}
+
 func TestListRecentRefusals(t *testing.T) {
 	f := &fake{}
 	e := newEngine(f)

@@ -47,10 +47,13 @@ type RelatedQuery struct {
 	WithDescriptions  bool
 }
 
-// RelatedResult answers get_related. The starting object is given once.
+// RelatedResult answers get_related. The starting object is given once, and
+// the filters are echoed so that a continuation can repeat them.
 type RelatedResult struct {
-	Of   Ref          `json:"of"`
-	Rows []RelatedRow `json:"relationships"`
+	Of                Ref          `json:"of"`
+	RelationshipTypes []string     `json:"relationship_types,omitempty"`
+	TargetTypes       []string     `json:"target_types,omitempty"`
+	Rows              []RelatedRow `json:"relationships"`
 	Page
 }
 
@@ -85,8 +88,7 @@ func (e *Engine) GetRelated(ctx context.Context, q RelatedQuery) (*RelatedResult
 	if err != nil {
 		return nil, err
 	}
-	cur, err := decodeCursor(q.Cursor)
-	if err != nil {
+	if _, err := decodeCursor(q.Cursor, ""); err != nil {
 		return nil, err
 	}
 	for _, r := range q.RelationshipTypes {
@@ -103,6 +105,14 @@ func (e *Engine) GetRelated(ctx context.Context, q RelatedQuery) (*RelatedResult
 		targets = append(targets, canon)
 	}
 	of, err := e.exists(ctx, q.ID)
+	if err != nil {
+		return nil, err
+	}
+	rels := append([]string(nil), q.RelationshipTypes...)
+	sort.Strings(rels)
+	sortedTargets := append([]string(nil), targets...)
+	sort.Strings(sortedTargets)
+	cur, err := decodeCursor(q.Cursor, fingerprint("related", of.ID, strings.Join(rels, ","), strings.Join(sortedTargets, ",")))
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +151,7 @@ func (e *Engine) GetRelated(ctx context.Context, q RelatedQuery) (*RelatedResult
 		}
 		return nil, err
 	}
-	res := &RelatedResult{Of: of, Rows: []RelatedRow{}}
+	res := &RelatedResult{Of: of, Rows: []RelatedRow{}, RelationshipTypes: q.RelationshipTypes, TargetTypes: targets}
 	for _, edge := range out.Conn.Edges {
 		w := edge.Node
 		dir, other := "outgoing", w.To
@@ -154,7 +164,7 @@ func (e *Engine) GetRelated(ctx context.Context, q RelatedQuery) (*RelatedResult
 		row.StartTime, row.StopTime = bounded(w.StartTime), bounded(w.StopTime)
 		res.Rows = append(res.Rows, row)
 	}
-	res.Page = pageOf(out.Conn.PageInfo.GlobalCount, len(res.Rows), cur, out.Conn.PageInfo.EndCursor)
+	res.Page = pageOf(out.Conn.PageInfo.GlobalCount, len(res.Rows), n, cur, out.Conn.PageInfo.EndCursor)
 	return res, nil
 }
 
@@ -183,11 +193,14 @@ func (e *Engine) GetReports(ctx context.Context, id string, limit int, cursorTok
 	if err != nil {
 		return nil, err
 	}
-	cur, err := decodeCursor(cursorToken)
-	if err != nil {
+	if _, err := decodeCursor(cursorToken, ""); err != nil {
 		return nil, err
 	}
 	of, err := e.exists(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	cur, err := decodeCursor(cursorToken, fingerprint("reports", of.ID))
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +238,7 @@ func (e *Engine) GetReports(ctx context.Context, id string, limit int, cursorTok
 		r.Markings = markings(w.ObjectMarking)
 		res.Containers = append(res.Containers, ContainerRow{Ref: r, Created: w.Created, Published: w.Published, CreatedBy: author(w.CreatedBy)})
 	}
-	res.Page = pageOf(out.Conn.PageInfo.GlobalCount, len(res.Containers), cur, out.Conn.PageInfo.EndCursor)
+	res.Page = pageOf(out.Conn.PageInfo.GlobalCount, len(res.Containers), n, cur, out.Conn.PageInfo.EndCursor)
 	return res, nil
 }
 

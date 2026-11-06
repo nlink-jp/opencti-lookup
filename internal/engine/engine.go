@@ -14,7 +14,9 @@ package engine
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -104,13 +106,19 @@ func (e *Engine) limit(n int) (int, error) {
 
 // --- paging ---------------------------------------------------------------
 
-// cursor is this tool's own continuation token: OpenCTI's cursor plus how many
-// rows were already handed out. hasNextPage is not trusted (Phase 0 §6: it is
-// false when OpenCTI truncated a page, and true for a two-item list of two),
-// so whether more remains is computed from the total.
+// cursor is this tool's own continuation token: OpenCTI's cursor, how many
+// rows were already handed out, and the query it continues. hasNextPage is not
+// trusted (Phase 0 §6: it is false when OpenCTI truncated a page, and true for
+// a two-item list of two), so whether more remains is computed from the
+// total. The query fingerprint makes a cursor from one list unusable on
+// another — OpenCTI would answer a foreign cursor with a DATABASE_ERROR or a
+// wrong page — and Since pins list_recent's window across pages, so new
+// arrivals do not shift the count.
 type cursor struct {
 	After string `json:"a"`
 	Seen  int    `json:"s"`
+	Query string `json:"q"`
+	Since string `json:"t,omitempty"`
 }
 
 func encodeCursor(c cursor) string {
@@ -118,17 +126,30 @@ func encodeCursor(c cursor) string {
 	return base64.RawURLEncoding.EncodeToString(b)
 }
 
-func decodeCursor(s string) (cursor, error) {
+// fingerprint names a query: the same list, filtered the same way.
+func fingerprint(parts ...string) string {
+	h := sha256.Sum256([]byte(strings.Join(parts, "\x00")))
+	return hex.EncodeToString(h[:6])
+}
+
+// decodeCursor reads a cursor and checks that it continues the query named by
+// query (a fingerprint). An empty token is the first page. An empty query
+// checks the token's form only, so a garbled cursor is refused before
+// anything is sent; the fingerprint is checked once the id is resolved.
+func decodeCursor(s, query string) (cursor, error) {
 	if s == "" {
-		return cursor{}, nil
+		return cursor{Query: query}, nil
 	}
 	b, err := base64.RawURLEncoding.DecodeString(s)
 	var c cursor
 	if err == nil {
 		err = json.Unmarshal(b, &c)
 	}
-	if err != nil || c.Seen < 0 || c.After == "" {
+	if err != nil || c.Seen < 0 || c.After == "" || c.Query == "" {
 		return cursor{}, invalid("cursor is not one this tool issued (pass next_cursor from a previous answer unchanged)")
+	}
+	if query != "" && c.Query != query {
+		return cursor{}, invalid("cursor continues a different list or different filters; pass it with the same id and filters it came with, or start again without it")
 	}
 	return c, nil
 }
@@ -138,16 +159,17 @@ type Page struct {
 	Total      int    `json:"total"`
 	Returned   int    `json:"returned"`
 	Remaining  int    `json:"remaining"`
+	Limit      int    `json:"limit"`
 	NextCursor string `json:"next_cursor,omitempty"`
 }
 
-func pageOf(total, returned int, prev cursor, endCursor string) Page {
+func pageOf(total, returned, limit int, prev cursor, endCursor string) Page {
 	seen := prev.Seen + returned
-	p := Page{Total: total, Returned: returned}
+	p := Page{Total: total, Returned: returned, Limit: limit}
 	if total > seen {
 		p.Remaining = total - seen
 		if returned > 0 && endCursor != "" {
-			p.NextCursor = encodeCursor(cursor{After: endCursor, Seen: seen})
+			p.NextCursor = encodeCursor(cursor{After: endCursor, Seen: seen, Query: prev.Query, Since: prev.Since})
 		}
 	}
 	return p

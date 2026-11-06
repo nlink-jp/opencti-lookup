@@ -341,6 +341,45 @@ func TestLivePaging(t *testing.T) {
 	}
 }
 
+// A continuation keeps its filters: page through FIXTURE-HERON's "targets"
+// one row at a time and every row is a "targets" relationship (the
+// pre-release review reproduced the opposite through the CLI's printed
+// continuation). A cursor taken to another query is refused.
+func TestLiveContinuationKeepsFilters(t *testing.T) {
+	e := readonly(t)
+	s, err := e.SearchThreats(ctx(t), "FIXTURE-HERON", []string{"intrusion-set"}, 0)
+	if err != nil || len(s.Rows) != 1 {
+		t.Fatalf("%v %+v", err, s)
+	}
+	q := engine.RelatedQuery{ID: s.Rows[0].ID, RelationshipTypes: []string{"targets"}, Limit: 1}
+	seen := 0
+	for page := 0; page < 10; page++ {
+		res, err := e.GetRelated(ctx(t), q)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, row := range res.Rows {
+			if row.Relationship != "targets" {
+				t.Fatalf("page %d holds %s", page, row.Relationship)
+			}
+			seen++
+		}
+		if res.NextCursor == "" {
+			if seen != res.Total || res.Remaining != 0 {
+				t.Fatalf("saw %d of %d, remaining %d", seen, res.Total, res.Remaining)
+			}
+			break
+		}
+		q.Cursor = res.NextCursor
+		if _, err := e.GetReports(ctx(t), s.Rows[0].ID, 1, q.Cursor); engine.Code(err) != engine.CodeInvalidArgument {
+			t.Fatalf("a get_related cursor was accepted by get_reports: %v", err)
+		}
+	}
+	if seen != 2 { // CVE-2099-0001 and the fixture sector
+		t.Fatalf("targets: %d", seen)
+	}
+}
+
 func contains(list []string, s string) bool {
 	for _, x := range list {
 		if x == s {

@@ -42,6 +42,7 @@ type RecentQuery struct {
 type RecentResult struct {
 	Type  string      `json:"type"`
 	Axis  string      `json:"axis"`
+	Days  int         `json:"days"`
 	Since string      `json:"since"`
 	Rows  []RecentRow `json:"items"`
 	Page
@@ -96,11 +97,15 @@ func (e *Engine) ListRecent(ctx context.Context, q RecentQuery) (*RecentResult, 
 	if err != nil {
 		return nil, err
 	}
-	cur, err := decodeCursor(q.Cursor)
+	cur, err := decodeCursor(q.Cursor, fingerprint("recent", q.Type, q.Axis, fmt.Sprint(q.Days)))
 	if err != nil {
 		return nil, err
 	}
-	since := now().UTC().Add(-time.Duration(q.Days) * 24 * time.Hour).Format("2006-01-02T15:04:05.000Z")
+	since := cur.Since // a continuation keeps its first page's window
+	if since == "" {
+		since = now().UTC().Add(-time.Duration(q.Days) * 24 * time.Hour).Format("2006-01-02T15:04:05.000Z")
+		cur.Since = since
+	}
 
 	root, fields := "reports", `published report_types`
 	if q.Type == "indicator" {
@@ -144,7 +149,7 @@ func (e *Engine) ListRecent(ctx context.Context, q RecentQuery) (*RecentResult, 
 		return nil, err
 	}
 	conn := out[root]
-	res := &RecentResult{Type: q.Type, Axis: q.Axis, Since: since, Rows: []RecentRow{}}
+	res := &RecentResult{Type: q.Type, Axis: q.Axis, Days: q.Days, Since: since, Rows: []RecentRow{}}
 	for _, edge := range conn.Edges {
 		w := edge.Node
 		r := RecentRow{Ref: ref(w.wireRef), CreatedAt: w.CreatedAt, Created: w.Created, Published: w.Published,
@@ -152,7 +157,7 @@ func (e *Engine) ListRecent(ctx context.Context, q RecentQuery) (*RecentResult, 
 		r.Markings = markings(w.ObjectMarking)
 		res.Rows = append(res.Rows, r)
 	}
-	res.Page = pageOf(conn.PageInfo.GlobalCount, len(res.Rows), cur, conn.PageInfo.EndCursor)
+	res.Page = pageOf(conn.PageInfo.GlobalCount, len(res.Rows), n, cur, conn.PageInfo.EndCursor)
 	return res, nil
 }
 

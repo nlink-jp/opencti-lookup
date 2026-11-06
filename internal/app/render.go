@@ -236,10 +236,12 @@ func renderEntity(w io.Writer, e *engine.Entity) {
 	}
 }
 
+// page prints how to continue a list: the same command, every filter, the
+// same page size, and the cursor (which only that query accepts).
 func page(w io.Writer, p engine.Page, cmd string) {
 	if p.Remaining > 0 {
 		if p.NextCursor != "" {
-			fmt.Fprintf(w, "… %d more: %s --cursor %s\n", p.Remaining, cmd, p.NextCursor)
+			fmt.Fprintf(w, "… %d more: %s --limit %d --cursor %s\n", p.Remaining, cmd, p.Limit, p.NextCursor)
 		} else {
 			fmt.Fprintf(w, "… %d more, not reachable from this page\n", p.Remaining)
 		}
@@ -267,7 +269,14 @@ func renderRelated(w io.Writer, r *engine.RelatedResult) {
 			block(w, row.Description)
 		}
 	}
-	page(w, r.Page, "opencti-lookup related "+r.Of.ID)
+	cmd := "opencti-lookup related " + r.Of.ID
+	for _, rel := range r.RelationshipTypes {
+		cmd += " --relationship " + rel
+	}
+	for _, tt := range r.TargetTypes {
+		cmd += " --target-type " + tt
+	}
+	page(w, r.Page, cmd)
 }
 
 func renderReports(w io.Writer, r *engine.ReportsResult) {
@@ -337,5 +346,5 @@ func renderRecent(w io.Writer, r *engine.RecentResult) {
 			block(w, row.Pattern)
 		}
 	}
-	page(w, r.Page, "opencti-lookup recent --type "+r.Type+" --by "+r.Axis)
+	page(w, r.Page, fmt.Sprintf("opencti-lookup recent --type %s --by %s --days %d", r.Type, r.Axis, r.Days))
 }
