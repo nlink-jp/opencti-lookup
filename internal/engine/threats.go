@@ -318,7 +318,7 @@ func (e *Engine) GetEntity(ctx context.Context, id string) (*Entity, error) {
 	ent := &Entity{
 		Ref: ref(w.wireRef), StandardID: w.StandardID, Name: w.Name, Aliases: w.Aliases,
 		Labels: labels(w.ObjectLabel), CreatedBy: author(w.CreatedBy), Confidence: w.Confidence, Revoked: w.Revoked,
-		Created: w.Created, Modified: w.Modified, CreatedAt: w.CreatedAt, FirstSeen: w.FirstSeen, LastSeen: w.LastSeen,
+		Created: w.Created, Modified: w.Modified, CreatedAt: w.CreatedAt, FirstSeen: bounded(w.FirstSeen), LastSeen: bounded(w.LastSeen),
 		Published: w.Published, ReportTypes: w.ReportTypes, IsFamily: w.IsFamily, MalwareTypes: w.MalwareTypes,
 		Platforms: w.Platforms, Pattern: w.Pattern, PatternType: w.PatternType, ValidFrom: w.ValidFrom,
 		ValidUntil: w.ValidUntil, Score: w.Score, DecayBase: w.DecayBase, ObservableValue: w.ObservableValue,

@@ -322,11 +322,15 @@ func TestGetEntity(t *testing.T) {
 		t.Fatal(err)
 	}
 	e = newEngine(&fake{replies: map[string]string{"Entity": `{"stixCoreObject":{"id":"n1","entity_type":"Note","representative":{"main":"A"},
+	  "first_seen":"2025-01-01T00:00:00.000Z","last_seen":"5138-11-16T09:46:40.000Z",
 	  "attribute_abstract":"Abstract","content":"Body","objectMarking":[{"definition":"TLP:GREEN"}],
 	  "externalReferences":{"pageInfo":{"globalCount":40},"edges":[{"node":{"source_name":"cve","external_id":"CVE-2099-0001"}}]}}}`}})
 	ent, err := e.GetEntity(context.Background(), "n1")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if ent.FirstSeen != "2025-01-01T00:00:00.000Z" || ent.LastSeen != "" {
+		t.Fatalf("the unbounded sentinel must not read as a date: %q %q", ent.FirstSeen, ent.LastSeen)
 	}
 	if ent.Description != "Abstract\n\nBody" || ent.ExternalRefs.Total != 40 || ent.ExternalRefs.Items[0].ExternalID != "CVE-2099-0001" {
 		t.Fatalf("%+v", ent)

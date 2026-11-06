@@ -67,8 +67,17 @@ type RelatedRow struct {
 	Description  string   `json:"description,omitempty"`
 }
 
-// openCTI's "unbounded" relationship times; reporting them adds nothing.
+// openTimes are OpenCTI's sentinels for "unbounded" (start_time, stop_time,
+// first_seen, last_seen); reporting them as dates would read as data.
 var openTimes = map[string]bool{"1970-01-01T00:00:00.000Z": true, "5138-11-16T09:46:40.000Z": true}
+
+// bounded returns ts, or "" when it is an unbounded sentinel.
+func bounded(ts string) string {
+	if openTimes[ts] {
+		return ""
+	}
+	return ts
+}
 
 // GetRelated walks relationships from one object.
 func (e *Engine) GetRelated(ctx context.Context, q RelatedQuery) (*RelatedResult, error) {
@@ -89,7 +98,7 @@ func (e *Engine) GetRelated(ctx context.Context, q RelatedQuery) (*RelatedResult
 	for _, t := range q.TargetTypes {
 		canon, ok := targetTypeSet[strings.ToLower(t)]
 		if !ok {
-			return nil, invalid("unknown target type %q (OpenCTI answers an unknown type with no rows rather than an error; see get_usage for the list)", t)
+			return nil, invalid("unknown target type %q (OpenCTI answers an unknown type with no rows rather than an error; the accepted types are listed in the README and by get_usage)", t)
 		}
 		targets = append(targets, canon)
 	}
@@ -142,12 +151,7 @@ func (e *Engine) GetRelated(ctx context.Context, q RelatedQuery) (*RelatedResult
 		row := RelatedRow{Relationship: w.RelationshipType, Direction: dir, Other: ref(other),
 			Confidence: w.Confidence, Markings: markings(w.ObjectMarking), CreatedBy: author(w.CreatedBy),
 			Description: w.Description}
-		if !openTimes[w.StartTime] {
-			row.StartTime = w.StartTime
-		}
-		if !openTimes[w.StopTime] {
-			row.StopTime = w.StopTime
-		}
+		row.StartTime, row.StopTime = bounded(w.StartTime), bounded(w.StopTime)
 		res.Rows = append(res.Rows, row)
 	}
 	res.Page = pageOf(out.Conn.PageInfo.GlobalCount, len(res.Rows), cur, out.Conn.PageInfo.EndCursor)
