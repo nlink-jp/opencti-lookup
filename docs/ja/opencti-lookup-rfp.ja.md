@@ -1,0 +1,242 @@
+# RFP: opencti-lookup
+
+> Generated: 2026-11-06
+> Status: Draft
+
+## 1. Problem Statement
+
+脅威分析を行うエージェントが参照できる情報源を増やすため、常時運用されている
+OpenCTI インスタンスに蓄積された脅威インテリジェンス（indicator・observable・
+レポート・攻撃者・intrusion set・マルウェア・ATT&CK 手法とそれらの関係）を、
+MCP 経由で**読み取り専用**で検索できるようにする。otx-lookup・gti-lookup などの
+外部インデックスと並ぶ情報源であり、問い合わせ先は自分たちが参照するインスタンスなので、
+調査対象にパケットは届かない。
+
+- **想定利用者**: 脅威分析を行うエージェント（gem-agent・lagent・Claude Code）とその操作者
+- **利用者の事前準備**: OpenCTI の URL と、提供元から支給される読み取り用 API キーを
+  設定ファイルに書くことだけ。OpenCTI 自体の構築・運用は利用者の負担にならない
+  （本番インスタンスは別環境で常時稼働している）
+- **利用環境**: 本番利用は開発機とは**完全に別の環境の Mac** から行う。開発機から
+  本番インスタンスへは到達できない
+
+## 2. Functional Specification
+
+### Commands / API Surface
+
+CLI と MCP サーバの二面を持ち、同じエンジンを共有する（兄弟の lookup 群と同じ構成）。
+本番の Mac で問題が起きたとき、CLI で同じ問い合わせを打って切り分けられるようにする。
+
+**Phase 1 の MCP ツール**
+
+| ツール | 答える問い |
+|---|---|
+| `lookup_ioc` | IP・ドメイン・URL・ハッシュ・メールアドレスの値（複数可、上限あり）について、一致する observable と indicator を返す。score・confidence・labels・markings（TLP 等）・作成者・有効期間、sighting（いつ・どこで・何回観測されたか）、それを含むレポートと `indicates` 等の関係先の要約を含む。**未登録は正常な結果**として返す |
+| `search_threats` | 攻撃者・intrusion set・campaign・malware・tool・attack pattern・vulnerability・report を名前・別名・キーワードで検索する。種別は enum で指定 |
+| `get_entity` | 1 件の詳細（説明・別名・外部参照・markings・作成者・indicator ならパターン本文） |
+| `get_related` | 1 件から関係をたどる。関係種別・相手種別で絞り込み、件数指定とカーソルによるページ送り |
+| `get_reports` | その対象を含むコンテナ（report・note・grouping）の一覧。OpenCTI では関係ではなく収録（`objects`）なので `get_related` と分ける |
+| `server_status` | 接続確認。OpenCTI の版、検証済みの版（6.7.4）との一致、キーのユーザー名・capabilities・見える markings、TLS 検証の有無 |
+| `get_usage` | エージェントが最初に読む操作説明（ツール・引数・エラーコード・引き方の例） |
+
+**Phase 2 の MCP ツール**
+
+| ツール | 答える問い |
+|---|---|
+| `list_recent` | 直近 N 日に作成・更新されたレポートや indicator |
+| `get_report_file` | レポートの添付ファイル（PDF 等）を `<work_dir>/<workspace_id>/` に保存し、パス・サイズ・種類を返す |
+
+ATT&CK 手法の一覧・標的業種・CVE を悪用する主体などは `get_related` の絞り込みで取れるため
+専用ツールは作らず、`get_usage` に引き方の例として書く。
+
+CLI のサブコマンドは各ツールに対応させる（名前は Phase 1 で兄弟ツールに揃えて決める）。
+すべてのサブコマンド（`mcp` を含む）が `--config <path>` を受け付ける。
+
+### Input / Output
+
+- 結果は JSON。CLI はテキスト表示と `--json` を持つ
+- **応答は全件を返し、明示的な上限を持つ**（ADR-021 §3）。件数上限は呼び出し引数と
+  設定の既定値・上限で決め、上限に当たったら `truncated: true` と全体件数を計上する。
+  黙って切り詰めない。大きな応答のファイル退避は呼び出し側のランタイムが行う
+  （gem-agent ADR-0058、lagent ADR-0039、Claude Code の MCP 出力上限）
+- 集約・参照リストも含めて**応答全体**に上限を引く（otx-lookup 162 KB の教訓）
+- どの結果にも markings・作成者・confidence を付ける。**判定（悪性/無害）は作らない**。
+  OpenCTI の score はそのまま渡す
+- エラーは構造化（`{code, message}`）。権限不足（`forbidden`）・未登録・接続失敗・
+  版不一致を区別する
+- 失敗した問い合わせを「該当なし」として返さない
+- MCP のツールスキーマは閉じる（`additionalProperties: false`）
+
+### Configuration
+
+- 既定の場所: `~/.config/opencti-lookup/config.toml`（XDG_CONFIG_HOME を尊重）
+- `--config <path>` で切り替え可能。**明示したファイルが存在しなければ、そのパスを
+  名指ししてエラーで止める**（兄弟ツールは黙って「設定なし」として進むが、本番環境での
+  切り分けを難しくするため変える）。既定の場所に無いのは問題にしない
+- 優先順位: フラグ > 環境変数（`OPENCTI_LOOKUP_*`） > 設定ファイル > 既定値
+- 設定項目
+  - `url`（必須）
+  - `token`（必須。`OPENCTI_LOOKUP_TOKEN` でも可。表示・ログ・URL に出さない）
+  - `ca_file`（自己署名・社内 CA の証明書を信頼する）
+  - `insecure_skip_verify`（既定 false。`--insecure` でも可）
+  - タイムアウト、既定の件数・上限
+- 設定ファイルは資格情報を含むため `.gitignore` 対象。`config.example.toml` を同梱
+- キャッシュは持たない（自インスタンスに利用回数上限はなく、connector が継続的に
+  更新しているので古い答えの害が大きい）
+
+### External Dependencies
+
+- OpenCTI 6.7.4 の GraphQL API（`/graphql`、`Authorization: Bearer <token>`）のみ
+- 開発用: Podman 上の OpenCTI 6.7.4 一式（platform・worker・Elasticsearch・Redis・
+  RabbitMQ・MinIO・MITRE connector）
+
+## 3. Design Decisions
+
+- **言語は Go、標準ライブラリのみ**。兄弟の lookup 群と揃える。pycti（Filigran 公式）は
+  Python 用で、Go からは GraphQL を net/http で直接呼ぶ
+- **組織の共通部品を使う**
+  - 設定ファイルの読み込みは `nlink-jp/toml`（ADR-026）
+  - リリースは共通リリースキット（ADR-028）
+  - `get_report_file` のパス判定は `nlink-jp/pathguard`（ADR-022、ADR-021 §4・§7・§10 の改訂）
+  - MCP の骨格は最新の兄弟（パッケージ単位の `git log` で選ぶ）から移植
+- **既製の OpenCTI MCP サーバは採用しない**。Filigran 公式の MCP サーバは見つからず、
+  コミュニティ製（DarkAngel-agents/opencti-mcp、MIT）のみだったため、組織のサプライチェーン
+  方針に従い自前で実装する
+- **補完する既存ツール**: otx-lookup・gti-lookup（外部の脅威インテリジェンス）、
+  cve-lookup（脆弱性の深刻度・悪用状況。OpenCTI 側では重複させない）
+- **制御の置き場所**: 何が見えるかはキー（OpenCTI のユーザー・グループ）が決める。
+  ツール側で markings による絞り込みはしない
+- **TLS 検証の無効化は、理由つきで受け入れた危険**。本番インスタンスは自己ホスティングで
+  証明書が正しく整っていない。検証を切ると経路上の第三者にトークンを盗まれ得るが、
+  利用者の環境内の経路であり、利用者の判断で受け入れる。既定は検証あり。まず `ca_file` を
+  試すことを README で案内する。有効時は `server_status` が報告し、CLI は起動時に 1 行警告
+  する（毎回の結果には付けない）
+- **範囲外（恒久）**
+  - 書き込みのすべて（エンティティ・関係の作成、エンリッチメントの起動、ケース作成）
+  - リアルタイムストリーム（SSE）
+  - 自組織のインシデント対応ケース・RFI の読み取り
+  - STIX バンドルの一括エクスポート
+
+## 4. Development Plan
+
+### Phase 0: 開発環境と実測（コードより先）
+
+- OpenCTI 6.7.4 の開発用環境を、リポジトリ内の compose ファイルと `make dev-up` /
+  `make dev-down` で起動・停止できるようにする（公式 docker 構成を元にする）
+- 起動確認: Podman machine（16 GB）で全体が起動するか。MITRE connector（6.7.4 は amd64 のみ）
+  が qemu エミュレーションで動いて取り込めるか
+- 実測して記録するもの（ADR-023）
+  - 各ツールに使う GraphQL クエリと実際の応答の形
+  - IOC 値の完全一致での引き方（全文検索ではなくフィルタで）
+  - 1 回の問い合わせで取れる件数の上限
+  - 添付ファイルの取得経路と必要な capability
+  - `me` で取れる capabilities・markings
+- 開発用環境に本番と同じ形の読み取り専用ユーザーを作る
+- **レビュー点**: 実測結果を確認してから Phase 1 に進む。ここで設計を確定し、
+  サブエージェントによる独立検証を行う
+
+### Phase 1: 中核機能とテスト
+
+- config（`--config`・`ca_file`・`insecure_skip_verify`）、GraphQL クライアント、
+  エンジン、Phase 1 の 7 ツール、CLI
+- オフラインテスト（`make test`）: 開発用環境から採った応答をフィクスチャにし、
+  `httptest` サーバに対して実行。TLS は自己署名の `httptest.NewTLSServer` で、
+  検証あり失敗・`ca_file` で成功・`insecure` で成功を確かめる。`usage.md` と
+  コードの一致をメタテストで固定する
+- 実環境テスト（`make e2e`、`e2e` ビルドタグ）: 開発用コンテナに対して実行
+
+### Phase 2: 追加機能
+
+- `list_recent`
+- `get_report_file`（ADR-021 の `work_dir` 契約、pathguard）
+
+### Phase 3: 文書とリリース
+
+- README.md / README.ja.md、AGENTS.md、CHANGELOG.md
+- リリース（署名・公証・zip・Homebrew tap）、cybersecurity-series への組み込み、
+  org profile 更新、knowledge への還元、check-org
+- リリース前のサブエージェント独立検証
+- **本番確認**: 本番の Mac で利用者が `server_status` と数件の照会を実行し、結果
+  （とくに capabilities・markings）を記録する。開発機から本番に届かないため、
+  ここは利用者の作業になる
+
+### 独立してレビューできる区切り
+
+Phase 0 の実測記録、Phase 1、Phase 2、Phase 3 はそれぞれ独立にレビューできる。
+
+### この計画に含めないもの
+
+- mcp-tactics スキルへの追記（skills-series 側の作業）。リリース時に skills-series に
+  issue を起こし、そちらで判断する
+
+## 5. Required API Scopes / Permissions
+
+- **提供元から支給される読み取り用 API キー 1 本**。利用者はユーザーやグループを作れず、
+  キーで何が見えるかは提供元が決める
+- LLM（クラウド・ローカルとも）へ結果を送ることは利用者が了承済み
+- ツールはキーの権限を何も前提にしない
+  - 権限不足は構造化エラー `forbidden` として返し、「該当なし」と区別する
+  - `server_status` がキーのユーザー名・capabilities・見える markings を返す
+- 開発用環境では、本番で `server_status` が返した capabilities を写した読み取り専用
+  ユーザーを作って試験する
+- **残る危険**: `get_report_file` に必要な権限が支給キーに無い可能性がある。その場合
+  本番では `forbidden` を返す機能になる
+
+## 6. Series Placement
+
+Series: cybersecurity-series
+Reason: 脅威インテリジェンスを読み取り専用で照会する lookup 群（otx-lookup・gti-lookup・
+cve-lookup 等）と同種のツールであり、命名もそれに揃える。
+
+## 7. External Platform Constraints
+
+- **版への依存**: GraphQL スキーマは OpenCTI の版で変わる。検証対象は本番と同じ 6.7.4 のみ。
+  `server_status` が版の不一致を警告する
+- **Phase 0 で実測する未確認事項**: 1 回の問い合わせの件数上限、IOC 値の完全一致の方法、
+  添付ファイルの取得経路と必要権限
+- **問い合わせ回数の制限**: OpenCTI 本体の既定の制限は未確認。前段のリバースプロキシで
+  制限される可能性もあるため、429 等は構造化エラーで返す
+- **connector のイメージ**: platform・worker の 6.7.4 は amd64/arm64 の両方があるが、
+  MITRE connector の 6.7.4 は amd64 のみ（2026-11-06 に Docker Hub で確認）。
+  開発用環境では qemu で動かす（Podman machine は Rosetta 無効・qemu-x86_64 登録済み）
+- **接続経路**: 本番の Mac から本番インスタンスへの経路は開発機から確認できない。
+  自己署名・不完全な証明書のため `ca_file` と `insecure_skip_verify` を用意する
+- **データは第三者の記述を含む**: OpenCTI の内容は外部フィードやレポートから取り込まれた
+  文章であり、誰が書いたものでも入り得る。指示に見える文章もデータとして扱うよう
+  `get_usage` に明記する
+- **開発機の制約**: Podman machine は data-toolbox-mcp・pcap-analyzer-mcp と共用。
+  16 GB（VM 内で利用可能 約 14 GB）・6 CPU・`vm.max_map_count = 1048576`（既定で十分）
+
+---
+
+## Discussion Log
+
+1. **実現可能性**: Podman での OpenCTI 開発環境は公式ドキュメントで対応が明記されている。
+   当初の懸念は arm64 イメージの有無とメモリ。`podman manifest inspect` で platform・
+   worker・MITRE connector の latest に arm64 があることを確認した
+2. **用途の向き**: 「OpenCTI から検索」か「OpenCTI へ投入」かを確認し、検索（読み取り）に決定
+3. **インスタンスの所在**: 本番は別環境で常時稼働しているインスタンス。開発用コンテナは
+   試験専用。OpenCTI 自体の運用負担は利用者にかからないため、準備の重さ
+   （gdrive-collector の中止理由）は問題にならないと判断した
+4. **版**: 本番は 6.7.4（利用者が確認）。開発用環境を揃える。6.7.4 の platform・worker は
+   arm64 ありだが MITRE connector は amd64 のみと判明。新しい connector を古い platform と
+   組み合わせる案は版を揃える目的に反するため却下し、qemu エミュレーションを採った
+5. **利用環境**: 本番利用は完全に別環境の Mac から。配布はリリース zip / Homebrew tap。
+   本番での確認は利用者が行う
+6. **ツール名**: `opencti-lookup`（兄弟の lookup 群に揃える）。`opencti-mcp` も候補だった
+7. **機能の追加検討**: 利用者の「他に提供できる機能は」に応じて洗い出した。sighting と
+   複数値照会を Phase 1 の `lookup_ioc` に、`list_recent` を Phase 2 に採用。ATT&CK・標的・
+   CVE 悪用主体は `get_related` で足りるため専用ツールにしない
+8. **大きな応答**: 当初「大きいので添付ファイルは対象外」としたが、利用者の指摘どおり
+   サーバ側スピルは廃止方針で、退避はランタイムが担う（ADR-021 §3）。gem-agent・lagent・
+   Claude Code の 3 つとも退避機構を持つことを確認した（Claude Code は 25,000 トークン /
+   50,000 文字超を成功結果のみファイル化）。添付ファイルは「産物がファイル」なので
+   `work_dir` 契約で Phase 2 に入れた
+9. **ADR-021 の有効性**: 利用者の問いを受けて確認。Accepted のままで、ADR-022 が §4・§7・§10 を
+   改訂しているのみ。§3 は有効
+10. **キャッシュ・CLI**: キャッシュなし、CLI と MCP の両面で確定
+11. **権限**: キーは提供元から支給され利用者は作れない。LLM へ送ることは了承済み。
+    ツールは権限を前提にせず、`server_status` で何ができるかを示す
+12. **`--config`**: 利用者の提案で採用。兄弟ツール（gti-lookup・shodan-lookup）に揃えるが、
+    明示パスが無いときは黙って進まずエラーにする点を変えた。兄弟側の同じ挙動は本件の範囲外
+13. **TLS 検証の無効化**: 自己ホスティングで証明書が整っていないため利用者が要望。
+    トークン漏洩の危険を理由つきで受け入れ、既定は検証あり・`ca_file` を先に案内する形にした
