@@ -1,0 +1,8 @@
+query Count {
+  indicators(first: 1) { pageInfo { globalCount } }
+  stixCyberObservables(first: 1) { pageInfo { globalCount } }
+  reports(first: 1) { pageInfo { globalCount } }
+  intrusionSets(first: 1) { pageInfo { globalCount } }
+  attackPatterns(first: 1) { pageInfo { globalCount } }
+  stixSightingRelationships(first: 1) { pageInfo { globalCount } }
+}

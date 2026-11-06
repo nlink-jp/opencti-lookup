@@ -1,0 +1,3 @@
+mutation SeedPush($connectorId: String!, $bundle: String!) {
+  stixBundlePush(connectorId: $connectorId, bundle: $bundle)
+}
