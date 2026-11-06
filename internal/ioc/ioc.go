@@ -145,9 +145,7 @@ func hashAlgorithm(k Kind) string {
 
 func validURL(s string) bool {
 	scheme, rest, _ := strings.Cut(s, "://")
-	if scheme == "" || strings.IndexFunc(scheme, func(r rune) bool {
-		return !(r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '+' || r == '-' || r == '.')
-	}) >= 0 {
+	if scheme == "" || strings.IndexFunc(scheme, func(r rune) bool { return !isSchemeRune(r) }) >= 0 {
 		return false
 	}
 	host := rest
@@ -172,13 +170,23 @@ func validDomain(s string) bool {
 			return false
 		}
 		for _, r := range l {
-			if !(unicode.IsLetter(r) || unicode.IsDigit(r) || r == '-' || r == '_') {
+			if !isLabelRune(r) {
 				return false
 			}
 		}
 	}
 	tld := labels[len(labels)-1]
 	return strings.IndexFunc(tld, func(r rune) bool { return !unicode.IsDigit(r) }) >= 0
+}
+
+// isSchemeRune reports whether r may appear in a URL scheme (RFC 3986 §3.1).
+func isSchemeRune(r rune) bool {
+	return r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '+' || r == '-' || r == '.'
+}
+
+// isLabelRune reports whether r may appear in a domain label as stored by feeds.
+func isLabelRune(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsDigit(r) || r == '-' || r == '_'
 }
 
 func dedupe(values ...string) []string {

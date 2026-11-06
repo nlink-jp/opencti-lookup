@@ -17,10 +17,9 @@ const MaxLookupValues = 50
 // this is reported as truncated, never silently cut.
 const candidateRows = 500
 
-// nestedRows is how many containers and relationships are listed under each
-// observable or indicator; the totals are always reported, and get_reports /
-// get_related read the rest.
-const nestedRows = 10
+// Up to 10 containers and relationships are listed under each observable and
+// indicator (the "first: 10" in the queries below); their totals are always
+// reported, and get_reports / get_related read the rest.
 
 // NotFoundNote is what a value with no match carries.
 const NotFoundNote = "nothing within what this key can see: OpenCTI answers \"not registered\" and \"not visible to this key\" identically"
