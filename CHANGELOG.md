@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format is based
 on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] — 2026-11-07
+
+### Fixed
+
+- A refused TLS certificate is explained by what is wrong with it. ca_file is
+  offered only when the issuer is the whole problem; a certificate that names
+  its host only in the legacy Common Name (no subjectAltName), names another
+  host, or has expired is reported as such, with what to ask the instance's
+  operator for — ca_file cannot fix those. The presented certificate is
+  examined even when verification stopped at the issuer, so the real cause is
+  named on the first attempt.
+
 ## [0.1.0] — 2026-11-06
 
 ### Added

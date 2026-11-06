@@ -130,3 +130,8 @@ another version.
   (it happened in `app_test.go`); `source_test.go` refuses it.
 - **OpenCTI's unbounded-time sentinels** (1970-01-01, 5138-11-16) are not
   dates; they are dropped from relationship and entity times.
+- **A CN-only certificate fails twice before it says so** (first production
+  instance, 2026-11-07): Go reports "unknown authority" until the issuer is
+  trusted, and only then "relies on legacy Common Name field". `tls.go`
+  examines the presented certificate up front so the message names the real
+  cause; ca_file is offered only when the issuer is the whole problem.

@@ -64,10 +64,14 @@ Unknown keys, empty values and out-of-range numbers are errors. A config file
 readable by others draws a warning.
 
 **Certificates.** For a self-signed or internal-CA certificate, point
-`ca_file` at it first. Only when that cannot work (a hostname mismatch, an
-expired certificate) set `insecure_skip_verify = true` — anyone on the network
-path can then read your token. The tool warns on every start, and
-`status` reports it.
+`ca_file` at it first. `ca_file` fixes only an untrusted issuer: the
+certificate must also name the host in a subjectAltName (`IP:…` for an IP
+address, `DNS:…` for a name) and be in date. A certificate that names its host
+only in the Common Name — what `openssl req` makes by default — is refused
+whoever issued it; ask the instance's operator for one with a subjectAltName.
+When none of that is possible, set `insecure_skip_verify = true` — anyone on the
+network path can then read your token. The tool warns on every start, and
+`status` reports it. Its error message says which of these applies.
 
 **Plain http** is accepted, with the same kind of warning: the token travels
 unencrypted on every request.

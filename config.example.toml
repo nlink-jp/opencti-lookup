@@ -23,6 +23,9 @@
 # A PEM file with the certificate (or its CA) the instance presents, for a
 # self-signed or internal-CA certificate. Try this before insecure_skip_verify.
 # OPENCTI_LOOKUP_CA_FILE overrides this value.
+# It fixes only an untrusted issuer: the certificate must also carry a
+# subjectAltName for the host (IP:... or DNS:...) and be in date. A
+# certificate that names its host only in the Common Name is refused anyway.
 #ca_file = "~/.config/opencti-lookup/opencti-ca.pem"
 
 # Skip TLS certificate verification. Anyone on the network path can then read
