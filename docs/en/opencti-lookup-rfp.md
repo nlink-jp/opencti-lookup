@@ -70,7 +70,11 @@ siblings). Every subcommand, `mcp` included, accepts `--config <path>`.
   included (the otx-lookup 162 KB lesson), in three tiers:
   1. list length (call argument, configured default and ceiling; below OpenCTI's 5,000-row page ceiling)
   2. over-long strings (descriptions and the like) are shortened, marked, and their original length given
-  3. a whole-response ceiling; past it, items are dropped from the tail and counted
+  3. a whole-response ceiling (128 KB). `lookup_ioc` and `search_threats` drop
+     values or rows from the tail and name them in notes; a paged list
+     (`get_related`, `get_reports`) is not cut — dropping rows would make its
+     cursor skip them — and answers `response_too_large`, asking for a smaller
+     `limit` (decided while implementing Phase 1)
 - **A short answer is detected by comparing the total with the rows received.**
   OpenCTI silently cuts `first` above 5,000 to 5,000 and reports `hasNextPage: false`
   (`hasNextPage` is not trusted)
@@ -207,7 +211,11 @@ Results are in [opencti-lookup-phase0.md](opencti-lookup-phase0.md). What follow
 - **Review point**: review the measurements before Phase 1. The design is
   finalized here, with an independent sub-agent verification pass
 
-### Phase 1: Core functionality and tests
+### Phase 1: Core functionality and tests — implemented 2026-11-06
+
+The six tools and the CLI, with offline tests (`make test`) and live tests
+against the development stack (`make e2e`). What was measured while
+implementing is recorded in AGENTS.md (Gotchas). What follows is the plan as written.
 
 - Config (`--config`, `ca_file`, `insecure_skip_verify`), GraphQL client, engine,
   the seven Phase 1 tools, CLI

@@ -1,0 +1,43 @@
+# opencti-lookup configuration — copy to one of (searched in this order):
+#   $XDG_CONFIG_HOME/opencti-lookup/config.toml
+#   ~/.config/opencti-lookup/config.toml
+#   ~/Library/Application Support/opencti-lookup/config.toml   (macOS)
+# or name it with --config <path> (a named file that does not exist is an error).
+#
+# Precedence: flag > environment variable > this file > built-in default.
+# Unknown keys, empty values and out-of-range numbers are errors, not ignored.
+#
+# This file holds a credential. Keep it readable only by you (chmod 600; the
+# tool warns otherwise) and out of version control.
+
+[opencti]
+# The instance's base URL (required). https is recommended; http is accepted,
+# with a warning that the token then travels unencrypted.
+# OPENCTI_LOOKUP_URL overrides this value.
+#url = "https://opencti.example.org"
+
+# The API key issued to you (required). Sent only in the Authorization header.
+# OPENCTI_LOOKUP_TOKEN overrides this value.
+#token = "00000000-0000-0000-0000-000000000000"
+
+# A PEM file with the certificate (or its CA) the instance presents, for a
+# self-signed or internal-CA certificate. Try this before insecure_skip_verify.
+# OPENCTI_LOOKUP_CA_FILE overrides this value.
+#ca_file = "~/.config/opencti-lookup/opencti-ca.pem"
+
+# Skip TLS certificate verification. Anyone on the network path can then read
+# the token; use it only when ca_file cannot work (a hostname mismatch, an
+# expired certificate). The tool warns on every start and server_status says so.
+# OPENCTI_LOOKUP_INSECURE_SKIP_VERIFY overrides this value.
+#insecure_skip_verify = false
+
+# Per-request timeout in seconds, 1-600.
+# OPENCTI_LOOKUP_TIMEOUT_SECONDS overrides this value; --timeout overrides both.
+#timeout_seconds = 30
+
+[query]
+# Rows a list returns when the caller does not say (search, related, reports).
+#default_limit = 25
+
+# The most rows one call may ask for, 1-5000 (OpenCTI returns at most 5000 per page).
+#max_limit = 500

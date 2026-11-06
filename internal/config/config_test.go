@@ -300,6 +300,41 @@ func TestTimeoutOverrideRange(t *testing.T) {
 	}
 }
 
+// The shipped example, with every setting uncommented, must load: an example
+// that names a key the loader refuses teaches the operator an error.
+func TestExampleConfigLoads(t *testing.T) {
+	isolate(t)
+	raw, err := os.ReadFile(filepath.Join("..", "..", "config.example.toml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var lines []string
+	uncommented := 0
+	for _, l := range strings.Split(string(raw), "\n") {
+		if strings.HasPrefix(l, "#") && strings.Contains(l, " = ") && !strings.HasPrefix(l, "# ") {
+			l = strings.TrimPrefix(l, "#")
+			uncommented++
+		}
+		lines = append(lines, l)
+	}
+	if uncommented != 7 {
+		t.Fatalf("uncommented %d settings; the example and this test disagree", uncommented)
+	}
+	dir := t.TempDir()
+	body := strings.Join(lines, "\n")
+	// The example's ca_file points at the operator's own certificate.
+	ca := write(t, filepath.Join(dir, "ca.pem"), selfSignedPEM(t), 0o600)
+	body = strings.Replace(body, `ca_file = "~/.config/opencti-lookup/opencti-ca.pem"`, `ca_file = "`+ca+`"`, 1)
+	p := write(t, filepath.Join(dir, "config.toml"), body, 0o600)
+	cfg, err := Load(p, 0)
+	if err != nil {
+		t.Fatalf("the uncommented example does not load: %v", err)
+	}
+	if cfg.URL != "https://opencti.example.org" || cfg.Token == "" || cfg.CAPool == nil || cfg.MaxLimit != 500 {
+		t.Fatalf("%+v", cfg.Redacted())
+	}
+}
+
 func selfSignedPEM(t *testing.T) string {
 	t.Helper()
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
