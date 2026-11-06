@@ -174,6 +174,19 @@ func TestLookupTruncationIsNoted(t *testing.T) {
 	if len(res.Notes) == 0 || !strings.Contains(res.Notes[0], "900 matched, 1 read") {
 		t.Fatalf("notes %v", res.Notes)
 	}
+
+	// A miss after a cut list is not "not found".
+	res, err = newEngine(f).LookupIOC(context.Background(), []string{"192.0.2.10", "192.0.2.200"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	miss := res.Results[1]
+	if miss.Found || !miss.Inconclusive || strings.Contains(miss.Note, "nothing within") {
+		t.Fatalf("%+v", miss)
+	}
+	if res.Results[0].Inconclusive {
+		t.Fatal("a found value is never inconclusive")
+	}
 }
 
 func TestLookupRefusals(t *testing.T) {

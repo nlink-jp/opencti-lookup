@@ -49,7 +49,10 @@ their algorithm) and through indicators whose STIX pattern compares against
 the value exactly. Indicators with no observable are found only the second
 way. Per value, `results[]` holds:
 
-- `found`, and `note` when nothing was found.
+- `found`, and `note` when nothing was found. `inconclusive: true` means
+  nothing was found among what was read, but a candidate list was cut (see
+  the top-level `notes`): the value may still be there — look it up on its
+  own. It is never a "not found".
 - `observables[]`: `value` as stored, `match` (`exact`, or `equivalent` when
   stored in another form — case, IP notation), the observable's own `score`,
   `containers` and `relationships` (each `{total, items}`, up to 10 items).

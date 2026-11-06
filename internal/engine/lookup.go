@@ -33,9 +33,12 @@ type LookupResult struct {
 
 // IOCResult is everything found for one input value.
 type IOCResult struct {
-	Input           string       `json:"input"`
-	Kind            ioc.Kind     `json:"kind"`
-	Found           bool         `json:"found"`
+	Input string   `json:"input"`
+	Kind  ioc.Kind `json:"kind"`
+	Found bool     `json:"found"`
+	// Inconclusive: nothing was found, but a candidate list was cut, so the
+	// value may be among what was not read. Never presented as "not found".
+	Inconclusive    bool         `json:"inconclusive,omitempty"`
 	Note            string       `json:"note,omitempty"`
 	Observables     []Observable `json:"observables"`
 	Indicators      []Indicator  `json:"indicators"`
@@ -269,7 +272,9 @@ func (e *Engine) LookupIOC(ctx context.Context, inputs []string) (*LookupResult,
 	if err := e.query(ctx, lookupObservablesQuery, map[string]any{"filters": observableFilter(values), "first": candidateRows}, &obsOut); err != nil {
 		return nil, err
 	}
+	cut := false // a candidate list was truncated: a miss is inconclusive
 	if n := obsOut.Conn.PageInfo.GlobalCount; n > len(obsOut.Conn.Edges) {
+		cut = true
 		res.Notes = append(res.Notes, fmt.Sprintf("observables: %d matched, %d read; look up fewer values at once", n, len(obsOut.Conn.Edges)))
 	}
 
@@ -287,6 +292,7 @@ func (e *Engine) LookupIOC(ctx context.Context, inputs []string) (*LookupResult,
 		return nil, err
 	}
 	if n := indOut.Conn.PageInfo.GlobalCount; n > len(indOut.Conn.Edges) {
+		cut = true
 		res.Notes = append(res.Notes, fmt.Sprintf("indicators: %d candidate patterns, %d read; some pattern-only indicators may be missing — look up fewer values at once", n, len(indOut.Conn.Edges)))
 	}
 
@@ -347,7 +353,11 @@ func (e *Engine) LookupIOC(ctx context.Context, inputs []string) (*LookupResult,
 			sightingOf[id] = append(sightingOf[id], i)
 		}
 		r.Found = len(r.Observables) > 0 || len(r.Indicators) > 0
-		if !r.Found {
+		switch {
+		case !r.Found && cut:
+			r.Inconclusive = true
+			r.Note = joinNote("not found among what was read, but more candidates matched than one call reads (see notes): look this value up on its own", r.Note)
+		case !r.Found:
 			r.Note = joinNote(NotFoundNote, r.Note)
 		}
 	}
