@@ -80,6 +80,11 @@ func isASCIIAlnum(r rune) bool {
 	return r < 128 && (unicode.IsLetter(r) || unicode.IsDigit(r))
 }
 
+// isNameRune reports whether r may stay in a saved name.
+func isNameRune(r rune) bool {
+	return isASCIIAlnum(r) || r == '.' || r == '-' || r == '_'
+}
+
 // reduce keeps ASCII letters, digits, dot, hyphen and underscore, turns runs
 // of anything else into one underscore, and trims dots, hyphens and
 // underscores from both ends so that nothing starts with a dot.
@@ -87,7 +92,7 @@ func reduce(s string) string {
 	var b strings.Builder
 	lastUnderscore := false
 	for _, r := range s {
-		if !(isASCIIAlnum(r) || r == '.' || r == '-' || r == '_') {
+		if !isNameRune(r) {
 			r = '_'
 		}
 		if r == '_' && lastUnderscore {
