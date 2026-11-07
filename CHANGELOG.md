@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format is based
 on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Security
+
+- A config file that is not valid TOML, or holds a value of the wrong type, is
+  reported by line (and column) without quoting the text there. The TOML
+  decoder quotes the token it cannot parse (up to 40 characters), so a token
+  written without quotes reached stderr in full — and from there an MCP
+  client's log.
+
 ## [0.1.1] — 2026-11-07
 
 ### Fixed

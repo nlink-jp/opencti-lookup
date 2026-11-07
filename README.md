@@ -60,8 +60,10 @@ in that order; `--config <path>` names one explicitly.
 | `[query] default_limit` | — | Rows a list returns by default (25) |
 | `[query] max_limit` | — | Most rows one call may ask for, 1-5000 (500) |
 
-Unknown keys, empty values and out-of-range numbers are errors. A config file
-readable by others draws a warning.
+Unknown keys, empty values and out-of-range numbers are errors. A file that is
+not valid TOML, or holds a value of the wrong type, is reported by line (and
+column) without quoting the text there, since it may be the token written
+without quotes. A config file readable by others draws a warning.
 
 **Certificates.** For a self-signed or internal-CA certificate, point
 `ca_file` at it first. `ca_file` fixes only an untrusted issuer: the

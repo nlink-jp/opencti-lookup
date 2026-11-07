@@ -128,11 +128,11 @@ func TestStrictFile(t *testing.T) {
 		{"timeout range", "[opencti]\ntimeout_seconds = 0\n", "timeout_seconds"},
 		{"max over ceiling", "[query]\nmax_limit = 5001\n", "max_limit"},
 		{"default over max", "[query]\nmax_limit = 10\ndefault_limit = 11\n", "default_limit"},
-		{"wrong type", "[opencti]\ninsecure_skip_verify = \"yes\"\n", "insecure_skip_verify"},
+		{"wrong type", "[opencti]\ninsecure_skip_verify = \"yes\"\n", "line 2: a value of the wrong type"},
 		{"bad scheme", "[opencti]\nurl = \"ftp://x.example\"\n", "http or https"},
 		{"user info", "[opencti]\nurl = \"https://u:p@x.example\"\n", "user info"},
 		{"query", "[opencti]\nurl = \"https://x.example/?a=1\"\n", "user info"},
-		{"syntax", "[opencti\n", "toml"},
+		{"syntax", "[opencti\n", "not valid TOML at line 1"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -349,4 +349,32 @@ func selfSignedPEM(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der}))
+}
+
+// The decoder quotes the token it cannot parse (up to 40 characters); a token
+// written without quotes must not reach stderr, and from there an MCP
+// client's log. The error still says where the file is wrong.
+func TestParseErrorNeverQuotesTheValue(t *testing.T) {
+	for _, body := range []string{
+		"[opencti]\ntoken = 7f3a9c1b2d4e5f60718293a4b5c6d7e8\n",  // starts with digits
+		"[opencti]\ntoken = 2026-11-07secretkeyvalue\n",          // starts like a date
+		"[opencti]\ntoken = secretkeyvalue\n",                    // letters only
+		"[opencti]\ntimeout_seconds = \"7f3a9c1b2d4e\"\n",        // a string where a number goes
+		"[opencti]\ninsecure_skip_verify = \"secretkeyvalue\"\n", // a string where a bool goes
+	} {
+		isolate(t)
+		p := write(t, filepath.Join(t.TempDir(), "c.toml"), body, 0o600)
+		_, err := Load(p, 0)
+		if err == nil {
+			t.Fatalf("%q was accepted", body)
+		}
+		for _, secret := range []string{"7f3a9c1b2d4e", "secretkeyvalue"} {
+			if strings.Contains(err.Error(), secret) {
+				t.Fatalf("the error quotes the value: %v", err)
+			}
+		}
+		if !strings.Contains(err.Error(), "line") {
+			t.Fatalf("the error must still say where: %v", err)
+		}
+	}
 }

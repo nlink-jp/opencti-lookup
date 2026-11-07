@@ -138,3 +138,8 @@ another version.
   branch on the error type: on macOS with no ca_file, an expired,
   not-yet-valid or client-only certificate is also "unknown authority", and Go
   reports not-yet-valid with `Reason: x509.Expired` — read the certificate.
+- **nlink-jp/toml quotes the token it cannot parse** (up to 40 characters),
+  so `token = 7f3a…` written without quotes would print the token in the
+  error. `describeTOMLError` reports only line and column (`ParseError`) or
+  line (`DecodeError`) and withholds everything else; never wrap a decode
+  error with `%w` or `%v`.
