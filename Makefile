@@ -21,7 +21,7 @@ PLATFORMS := \
 COMPOSE     := podman compose --env-file dev/.env -f dev/compose.yaml
 MINIO_IMAGE := localhost/opencti-lookup-dev/minio:RELEASE.2024-05-28T17-19-04Z
 
-.PHONY: build build-all test lint check e2e package verify-release clean help \
+.PHONY: build build-all test lint check e2e package verify-release clean help vuln \
 	dev-env dev-minio dev-up dev-down dev-ps dev-logs dev-health dev-reset
 
 ## build: Build for the current platform
@@ -63,12 +63,19 @@ e2e: build
 		OPENCTI_E2E_BINARY="$(CURDIR)/dist/$(BINARY)" \
 		go test -tags e2e -count=1 -v ./e2e/...
 
+## vuln: known vulnerabilities in the modules and the standard library this
+## build uses (govulncheck). `package` depends on it, so a release cannot be
+## built past a finding. It needs the network, and its database changes under
+## an unchanged tree: a finding can appear without a commit.
+vuln:
+	govulncheck ./...
+
 ## package: Build all platforms, archive with version suffix (zip for
 ## darwin/windows, tar.gz for linux), bundle the canonical binary +
 ## README.md + LICENSE, and notarize the darwin build. Asset naming
 ## follows the org Release Archive Standard
 ## (opencti-lookup-vX.Y.Z-<os>-<arch>.<ext>).
-package: build-all
+package: vuln build-all
 	@cd dist && for p in $(PLATFORMS); do os=$${p%/*}; arch=$${p#*/}; \
 		ext=""; [ "$$os" = windows ] && ext=".exe"; \
 		stage=_pkg; rm -rf $$stage; mkdir -p $$stage; \
